@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公考WorkBuddy · 备考工作台</title>
+<style>
+/* ============ 设计系统 · 森系薄荷桃粉 ============ */
+:root{
+  --primary:#8FA88D;           /* 主色：灰绿 */
+  --primary-light:#B4C6AE;     /* 辅助：浅灰绿 */
+  --primary-dark:#6d8a6b;
+  --primary-bg:#eef2ec;        /* 极浅绿背景 */
+  --primary-bg2:#dfe7db;
+  --accent:#39D6C2;            /* 强调：青翡翠 */
+  --accent-light:#8de8d8;
+  --info:#8cccd3;              /* 薄荷蓝 */
+  --info-bg:#eaf7f9;
+  --purple:#b8a0c6;
+  --purple-bg:#f3edf7;
+  --success:#7aaa8a;
+  --danger:#e8a0a0;            /* 浅桃粉红 */
+  --warn:#f0c090;              /* 暖杏 */
+  --bg:#ECE8DC;                /* 页面底色：暖米白 */
+  --card:#ffffff;
+  --border:#ddd8cc;
+  --border-light:#e8e4da;
+  --text:#3a3530;
+  --text-light:#7a7268;
+  --text-muted:#b0a898;
+  --shadow:0 1px 3px rgba(120,110,95,.06),0 1px 2px rgba(0,0,0,.03);
+  --shadow-md:0 4px 14px rgba(120,110,95,.08);
+  --radius:12px;
+  --radius-sm:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.65;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,textarea,select{font-family:inherit;font-size:13.5px}
+a{color:var(--primary);text-decoration:none;cursor:pointer}
+
+/* ============ 布局 ============ */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:218px;background:linear-gradient(180deg,var(--primary-dark),var(--primary));color:#fff;flex-shrink:0;
+  position:fixed;top:0;bottom:0;left:0;padding:22px 0 30px;overflow-y:auto;z-index:100;
+}
+.sidebar .logo{padding:0 22px 20px;border-bottom:1px solid rgba(255,255,255,.13);margin-bottom:14px}
+.sidebar .logo h1{font-size:17px;font-weight:700;letter-spacing:.3px}
+.sidebar .logo .sub{font-size:11px;opacity:.75;margin-top:5px}
+.sidebar .countdown-mini{padding:10px 22px;font-size:12px;opacity:.85;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:10px}
+.sidebar .countdown-mini b{font-size:22px;color:#fff;display:block;line-height:1.2}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:11px 22px;
+  color:rgba(255,255,255,.72);font-size:13px;cursor:pointer;
+  border-left:3px solid transparent;transition:all .15s;
+}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.13);color:#fff;border-left-color:var(--accent-light)}
+.nav-item .num{font-size:15px;width:18px;text-align:center;font-weight:600}
+.main{flex:1;margin-left:218px;padding:26px 32px 60px;max-width:calc(100vw - 218px)}
+.page{display:none}
+.page.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.page-header h2{font-size:20px;font-weight:700;color:var(--primary-dark)}
+.page-header .sub{font-size:12px;color:var(--text-light);margin-top:2px}
+.btn{
+  display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+  background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-size:13px;transition:all .15s;
+}
+.btn:hover{background:var(--primary-light)}
+.btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn.ghost:hover{background:var(--primary-bg);border-color:var(--primary)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.danger{background:var(--danger)}
+.btn.accent{background:var(--accent);color:#fff}
+
+/* ============ 卡片 ============ */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px;border:1px solid var(--border-light)}
+.card h3{font-size:14.5px;font-weight:600;margin-bottom:14px;color:var(--primary-dark);display:flex;align-items:center;gap:7px}
+.card h3 .tag{font-size:11px;font-weight:400;color:var(--text-muted);margin-left:auto}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1100px){.grid-3,.grid-4{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+
+/* ============ 倒计时 ============ */
+.countdown-box{
+  background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;
+  border-radius:var(--radius);padding:22px 26px;text-align:center;position:relative;overflow:hidden;
+}
+.countdown-box::after{content:"";position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%}
+.countdown-box .days{font-size:58px;font-weight:800;line-height:1;letter-spacing:-1px}
+.countdown-box .days-label{font-size:12px;opacity:.8;margin-top:5px}
+.countdown-box .target{font-size:11px;opacity:.65;margin-top:8px}
+.countdown-box .phase{display:inline-block;margin-top:10px;padding:3px 13px;background:rgba(255,255,255,.16);border-radius:18px;font-size:11px}
+
+/* ============ 进度环 ============ */
+.ring-wrap{display:flex;align-items:center;gap:14px}
+.ring-svg{width:88px;height:88px;flex-shrink:0}
+.ring-svg circle{fill:none;stroke-width:8}
+.ring-bg{stroke:var(--border-light)}
+.ring-fg{stroke:var(--primary);stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .4s}
+.ring-fg.success{stroke:var(--success)}
+.ring-fg.warn{stroke:var(--warn)}
+.ring-text{font-size:10px;fill:var(--text-light)}
+.ring-val{font-size:17px;font-weight:700;fill:var(--primary-dark)}
+.ring-info{flex:1}
+.ring-info .num{font-size:22px;font-weight:700;color:var(--primary-dark)}
+.ring-info .lbl{font-size:12px;color:var(--text-light)}
+
+/* ============ 习惯打卡 ============ */
+.habit-list{display:flex;flex-direction:column;gap:7px}
+.habit{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--primary-bg);border-radius:var(--radius-sm);transition:all .15s;cursor:pointer}
+.habit.done{background:#dfe7db}
+.habit .check{width:19px;height:19px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:transparent;transition:all .15s}
+.habit.done .check{background:var(--success);border-color:var(--success);color:#fff}
+.habit .h-name{flex:1;font-size:13px}
+.habit.done .h-name{text-decoration:line-through;color:var(--text-muted)}
+
+/* ============ 时段任务表 ============ */
+.session{border-left:3px solid var(--primary);padding:10px 14px;margin-bottom:10px;background:var(--primary-bg);border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.session.t2{border-left-color:var(--info);background:var(--info-bg)}
+.session.t3{border-left-color:var(--accent);background:#fdf6e8}
+.session.t4{border-left-color:var(--purple);background:var(--purple-bg)}
+.session .s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.session .s-title{font-weight:600;font-size:13px}
+.session .s-time{font-size:11px;color:var(--text-light);background:#fff;padding:2px 8px;border-radius:10px}
+.task-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px}
+.task-item .t-check{width:15px;height:15px;border:1.5px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent}
+.task-item.done .t-check{background:var(--success);border-color:var(--success);color:#fff}
+.task-item.done .t-text{text-decoration:line-through;color:var(--text-muted)}
+
+/* 11时段表格 */
+.time-table{width:100%;border-collapse:collapse;font-size:12px}
+.time-table th,.time-table td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--border-light)}
+.time-table th{font-weight:600;color:var(--text-light);font-size:11px;background:var(--primary-bg);position:sticky;top:0}
+.time-table tr:hover td{background:var(--primary-bg)}
+.time-table .col-time{font-weight:600;color:var(--primary-dark);white-space:nowrap}
+.time-table .col-task{font-weight:500}
+.time-table .col-dur{color:var(--text-light);white-space:nowrap}
+.tt-btn{padding:3px 8px;font-size:11px;border-radius:5px;border:1px solid var(--border);background:#fff;color:var(--text-light);cursor:pointer}
+.tt-btn.done{background:var(--success);color:#fff;border-color:var(--success)}
+
+/* ============ 表格 ============ */
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th,table.data td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border-light)}
+table.data th{font-weight:600;color:var(--text-light);font-size:12px;background:var(--primary-bg)}
+table.data tr:hover td{background:var(--primary-bg)}
+
+/* ============ 表单 ============ */
+.form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.form-row > *{flex:1;min-width:120px}
+.input,textarea,select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:13px}
+.input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(120,110,95,.12)}
+label{font-size:12px;color:var(--text-light);display:block;margin-bottom:4px}
+textarea{resize:vertical;min-height:55px}
+
+/* ============ 标签 ============ */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:var(--primary-bg);color:var(--primary-dark)}
+.tag.green{background:#dfe7db;color:var(--success)}
+.tag.blue{background:var(--info-bg);color:var(--info)}
+.tag.red{background:#fce8e7;color:var(--danger)}
+.tag.yellow{background:#fdf6e8;color:var(--warn)}
+.tag.purple{background:var(--purple-bg);color:var(--purple)}
+.tag.gray{background:#f0f2f1;color:var(--text-light)}
+
+/* ============ 进度条 ============ */
+.progress{height:7px;background:var(--border-light);border-radius:4px;overflow:hidden}
+.progress > div{height:100%;background:var(--primary);border-radius:4px;transition:width .4s}
+.progress > div.success{background:var(--success)}
+.progress > div.warn{background:var(--warn)}
+.progress > div.info{background:var(--info)}
+
+/* ============ 热力图 ============ */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.heat-cell{aspect-ratio:1;border-radius:4px;background:var(--border-light);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted)}
+.heat-cell.l1{background:#c8e6d5}
+.heat-cell.l2{background:#8fcfae}
+.heat-cell.l3{background:#52b083}
+.heat-cell.l4{background:var(--primary);color:#fff}
+
+/* ============ 思维导图树 ============ */
+.mindmap-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.mindmap-tab{padding:6px 14px;border-radius:18px;font-size:12.5px;cursor:pointer;background:var(--bg);color:var(--text-light);border:1px solid var(--border)}
+.mindmap-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tree{padding-left:0}
+.tree-node{position:relative;padding-left:18px;margin:3px 0}
+.tree-node::before{content:"";position:absolute;left:5px;top:0;bottom:50%;border-left:2px solid var(--border);border-bottom:2px solid var(--border);width:9px}
+.tree-node.root{padding-left:0;font-weight:600}
+.tree-node.root::before{display:none}
+.tree-toggle{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:5px}
+.tree-toggle .arrow{font-size:9px;transition:transform .15s;color:var(--primary)}
+.tree-node.collapsed > .tree-toggle .arrow{transform:rotate(-90deg)}
+.tree-children{overflow:hidden;max-height:9999px;transition:max-height .25s}
+.tree-node.collapsed > .tree-children{max-height:0}
+.tree-node .kp-name{font-size:13px}
+.tree-node .kp-formula{font-size:12px;color:var(--text-light);font-style:italic;margin-left:4px}
+.tree-node .mastered{width:15px;height:15px;border:1.5px solid var(--border);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:transparent;cursor:pointer;margin-left:5px;vertical-align:middle}
+.tree-node .mastered.on{background:var(--success);border-color:var(--success);color:#fff}
+
+/* ============ 成语卡 ============ */
+.idiom-card{background:var(--card);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:13px;margin-bottom:11px;transition:box-shadow .15s}
+.idiom-card:hover{box-shadow:var(--shadow-md)}
+.idiom-card .i-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.idiom-card .i-word{font-size:18px;font-weight:700;color:var(--primary-dark)}
+.i-example{background:var(--info-bg);padding:7px 10px;border-radius:var(--radius-sm);font-size:12px;line-height:1.7;color:var(--info);border-left:3px solid var(--info)}
+
+/* ============ 精读库 ============ */
+.jd-topic-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1100px){.jd-topic-grid{grid-template-columns:1fr 1fr}}
+.jd-topic-card{border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;border:1.5px solid var(--border-light);background:var(--card);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.jd-topic-card:hover{box-shadow:var(--shadow-md);border-color:var(--primary);transform:translateY(-2px)}
+.jd-topic-card.active{border-color:var(--primary);background:var(--primary-bg)}
+.jd-topic-card .jd-t-icon{font-size:28px;margin-bottom:8px}
+.jd-topic-card .jd-t-name{font-weight:700;font-size:14px;color:var(--primary-dark);margin-bottom:3px}
+.jd-topic-card .jd-t-count{font-size:11px;color:var(--text-muted)}
+.jd-topic-card .jd-t-badge{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600}
+.jd-article-card{border-left:3px solid var(--primary);padding:14px;margin-bottom:10px;background:var(--card);border-radius:0 var(--radius-sm) var(--radius-sm) 0;box-shadow:var(--shadow)}
+.jd-article-card .jd-a-title{font-weight:600;font-size:14.5px;color:var(--primary-dark);margin-bottom:6px}
+.jd-article-card .jd-a-meta{font-size:11px;color:var(--text-muted);margin-bottom:8px}
+.jd-section{margin:12px 0;padding:12px 14px;border-radius:var(--radius-sm);font-size:12.5px;line-height:1.8}
+.jd-section.jd-structure{background:#f0f7ff;border-left:3px solid var(--info)}
+.jd-section.jd-template{background:#fff9e6;border-left:3px solid var(--accent)}
+.jd-section.jd-sentences{background:var(--primary-bg);border-left:3px solid var(--primary)}
+.jd-section.jd-interview{background:#ede4ff;border-left:3px solid var(--purple)}
+.jd-section.jd-tips{background:#fdf0f0;border-left:3px solid var(--danger)}
+.jd-section b{display:block;margin-bottom:5px;color:var(--text);font-size:13px}
+.jd-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.jd-tag{font-size:10.5px;padding:3px 9px;border-radius:10px;background:var(--bg);color:var(--text-light);border:1px solid var(--border)}
+.jd-article-detail{display:none}
+.jd-article-detail.show{display:block;animation:fade .25s ease}
+.jd-back{display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:var(--primary);font-size:13px;margin-bottom:14px}
+.jd-back:hover{color:var(--primary-dark)}
+.jd-full-text{background:var(--bg);padding:14px 16px;border-radius:var(--radius-sm);font-size:13px;line-height:2;max-height:400px;overflow-y:auto;margin:10px 0;border:1px solid var(--border-light)}
+
+/* ============ 思维导图(mindmap) ============ */
+.mm-tree{position:relative;padding-left:0}
+.mm-node{position:relative;margin:4px 0;padding:6px 10px 6px 28px;border-radius:6px;font-size:12.5px;line-height:1.7;border-left:2px solid transparent;transition:all .12s}
+.mm-node:hover{background:rgba(0,0,0,.02)}
+.mm-node.mm-root{font-weight:700;font-size:13.5px;padding:8px 12px;margin:8px 0 4px;border-radius:8px;border-left-width:0;padding-left:12px}
+.mm-node.mm-root::before{display:none}
+.mm-node::before{content:'';position:absolute;left:10px;top:14px;width:6px;height:6px;border-radius:50%}
+.mm-node.mm-l2{padding-left:44px}
+.mm-node.mm-l2::before{left:26px}
+.mm-node.mm-l3{padding-left:60px;font-size:11.5px;color:var(--text-light)}
+.mm-node.mm-l3::before{left:42px;width:4px;height:4px}
+.mm-tree .mm-branch{position:relative}
+.mm-tree .mm-branch::after{content:'';position:absolute;left:13px;top:14px;bottom:0;width:1px;background:var(--border)}
+.mm-tree .mm-branch>.mm-node:last-child::after{content:'';position:absolute;left:13px;top:14px;bottom:50%;width:1px;background:var(--bg)}
+.mm-tree.mm-blue .mm-root{background:#f0f7ff;border-left:3px solid var(--info);color:#1a56db}
+.mm-tree.mm-blue .mm-node::before{background:var(--info)}
+.mm-tree.mm-gold .mm-root{background:#fff9e6;border-left:3px solid var(--accent);color:#92400e}
+.mm-tree.mm-gold .mm-node::before{background:var(--accent)}
+.mm-tree.mm-green .mm-root{background:var(--primary-bg);border-left:3px solid var(--primary);color:var(--primary-dark)}
+.mm-tree.mm-green .mm-node::before{background:var(--primary)}
+.mm-tree.mm-purple .mm-root{background:#ede4ff;border-left:3px solid var(--purple);color:#6d28d9}
+.mm-tree.mm-purple .mm-node::before{background:var(--purple)}
+.mm-tree.mm-red .mm-root{background:#fdf0f0;border-left:3px solid var(--danger);color:#991b1b}
+.mm-tree.mm-red .mm-node::before{background:var(--danger)}
+
+/* ============ 模态框 ============ */
+.modal-mask{position:fixed;inset:0;background:rgba(31,107,66,.35);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal-mask.show{display:flex}
+.modal{background:var(--card);border-radius:var(--radius);width:540px;max-width:100%;max-height:85vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow-md)}
+.modal h3{font-size:16px;margin-bottom:16px;color:var(--primary-dark)}
+.modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+
+/* ============ 知识点覆盖度 ============ */
+.cov-bar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin:4px 0}
+.cov-bar .cov-done{background:var(--success);transition:width .3s}
+.cov-bar .cov-undone{background:var(--border-light)}
+.cov-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-light)}
+.cov-row .cov-name{width:80px;font-weight:600;font-size:12.5px}
+.cov-row .cov-bar-wrap{flex:1}
+.cov-row .cov-num{font-size:11px;color:var(--text-light);width:70px;text-align:right;white-space:nowrap}
+.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ============ 笔记聚合 ============ */
+.note-card{border-left:3px solid var(--primary);padding:12px 14px;margin-bottom:10px;background:var(--card);border-radius:0 var(--radius-sm) var(--radius-sm) 0;box-shadow:var(--shadow)}
+.note-card.note-mistake{border-left-color:var(--danger)}
+.note-card.note-qiushi{border-left-color:var(--info)}
+.note-card.note-course{border-left-color:var(--accent)}
+.note-card .note-type{font-size:10px;text-transform:uppercase;padding:2px 7px;border-radius:8px;display:inline-block;margin-bottom:6px}
+.note-card .note-type.note-mistake{background:#fce8e7;color:var(--danger)}
+.note-card .note-type.note-qiushi{background:var(--info-bg);color:var(--info)}
+.note-card .note-type.note-course{background:#fdf6e8;color:var(--warn)}
+.note-card .note-title{font-weight:600;font-size:13.5px;margin-bottom:4px}
+.note-card .note-body{font-size:12.5px;color:var(--text-light);line-height:1.7}
+.note-card .note-meta{font-size:11px;color:var(--text-muted);margin-top:6px}
+
+/* ============ 杂项 ============ */
+.empty{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px}
+.empty .ico{font-size:28px;display:block;margin-bottom:6px;opacity:.4}
+.flex{display:flex;align-items:center;gap:8px}
+.flex.between{justify-content:space-between}
+.flex.wrap{flex-wrap:wrap}
+.mt-6{margin-top:6px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-6{margin-bottom:6px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}
+.text-center{text-align:center}
+.text-muted{color:var(--text-muted)}
+.text-sm{font-size:12px}
+.text-xs{font-size:11px}
+.text-lg{font-size:16px}
+.text-bold{font-weight:600}
+.text-primary{color:var(--primary-dark)}
+.text-success{color:var(--success)}
+.text-danger{color:var(--danger)}
+.text-info{color:var(--info)}
+.stat-num{font-size:26px;font-weight:700;color:var(--primary-dark)}
+.stat-label{font-size:11px;color:var(--text-light)}
+.stat-card{text-align:center;padding:14px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat-card .stat-num{display:block}
+.divider{height:1px;background:var(--border-light);margin:12px 0}
+.badge-due{display:inline-block;padding:2px 6px;background:var(--danger);color:#fff;border-radius:4px;font-size:10px;margin-left:5px}
+.scroll-y{max-height:420px;overflow-y:auto}
+.tab-bar{display:flex;gap:4px;margin-bottom:14px;border-bottom:2px solid var(--border-light);padding-bottom:0}
+.tab-bar .tab{padding:7px 16px;font-size:13px;cursor:pointer;color:var(--text-light);border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-bar .tab.active{color:var(--primary-dark);border-bottom-color:var(--primary);font-weight:600}
+
+/* 日历 */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-cell{aspect-ratio:1.1;background:var(--bg);border-radius:5px;padding:5px;font-size:11px;position:relative}
+.cal-cell.has-event{background:var(--primary-bg)}
+.cal-cell.today{box-shadow:0 0 0 2px var(--accent)}
+.cal-cell .d-num{font-weight:600}
+.cal-cell .d-event{font-size:9px;color:var(--primary-dark);margin-top:2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-head{text-align:center;font-size:11px;color:var(--text-muted);font-weight:600;padding:4px 0}
+
+/* 阶段切换 */
+.phase-steps{display:flex;gap:0;margin-bottom:16px}
+.phase-step{flex:1;padding:10px 14px;background:var(--bg);border-radius:0;font-size:12px;text-align:center;position:relative;border-right:2px solid #fff}
+.phase-step:last-child{border-right:none}
+.phase-step.active{background:var(--primary);color:#fff}
+.phase-step.done{background:var(--primary-bg);color:var(--primary-dark)}
+.phase-step .ph-name{font-weight:600;font-size:13px}
+.phase-step .ph-range{font-size:10px;opacity:.7;margin-top:2px}
+
+/* 四列任务对照表 */
+.four-col-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.four-col-table th{padding:6px 7px;text-align:left;background:var(--primary-bg);color:var(--primary-dark);font-size:11px;font-weight:600;border-bottom:2px solid var(--primary)}
+.four-col-table td{padding:6px 7px;border-bottom:1px solid var(--border-light);vertical-align:top}
+.four-col-table .fc-cat{font-weight:600;color:var(--primary-dark);white-space:nowrap}
+
+/* ============ 移动端适配 ============ */
+@media(max-width:768px){
+  .app{flex-direction:column}
+  .sidebar{
+    position:relative;width:100%;padding:12px 0 0;
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+  }
+  .sidebar .logo{padding:0 16px 10px;margin-bottom:8px}
+  .sidebar .logo h1{font-size:15px}
+  .sidebar .countdown-mini{padding:8px 16px;margin-bottom:4px}
+  .sidebar .countdown-mini b{font-size:16px;display:inline;margin-left:4px}
+  .sidebar .nav-scroll{display:flex;overflow-x:auto;padding:6px 12px;gap:2px;-webkit-overflow-scrolling:touch}
+  .sidebar .nav-scroll::-webkit-scrollbar{display:none}
+  .nav-item{
+    flex-shrink:0;padding:8px 12px;font-size:12px;border-left:none;border-bottom:2px solid transparent;
+    border-radius:8px 8px 0 0;white-space:nowrap
+  }
+  .nav-item .num{font-size:13px;width:auto;min-width:14px}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--accent-light)}
+  .main{margin-left:0;padding:14px 12px 40px;max-width:100%}
+  .page-header h2{font-size:17px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .jd-topic-grid{grid-template-columns:1fr 1fr}
+  .countdown-box .days{font-size:42px}
+  .phase-steps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .phase-step{flex-shrink:0;min-width:120px;font-size:11px}
+  .modal{width:95%;margin:10px;padding:16px;max-height:90vh}
+  .four-col-table{font-size:10px}
+  .four-col-table th,.four-col-table td{padding:4px 5px}
+  .stat-num{font-size:20px}
+  .stat-card{padding:10px}
+  .card{padding:12px;margin-bottom:10px}
+  .btn{font-size:12px;padding:6px 10px}
+  /* 侧边栏底部操作区 */
+  .sidebar .sync-actions{
+    display:flex;gap:6px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.1);margin-top:6px
+  }
+  .sidebar .sync-actions .btn-sync{
+    flex:1;padding:7px 0;background:rgba(255,255,255,.12);color:#fff;border-radius:6px;
+    font-size:11px;text-align:center;cursor:pointer;border:none
+  }
+  .sidebar .sync-actions .btn-sync:active{background:rgba(255,255,255,.22)}
+  .sidebar .reset-link{text-align:center;padding:8px 0 14px}
+  .sidebar .reset-link a{color:rgba(255,255,255,.45);font-size:10px;cursor:pointer}
+}
+/* ============ 桌面端同步按钮 ============ */
+@media(min-width:769px){
+  .sidebar .sync-actions{
+    display:flex;flex-direction:column;gap:5px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);margin-top:8px
+  }
+  .sidebar .sync-actions .btn-sync{
+    padding:8px 12px;background:rgba(255,255,255,.1);color:#fff;border-radius:6px;
+    font-size:11px;text-align:center;cursor:pointer;border:none;transition:all .15s
+  }
+  .sidebar .sync-actions .btn-sync:hover{background:rgba(255,255,255,.18)}
+  .sidebar .reset-link{text-align:center;padding:6px 0 10px}
+  .sidebar .reset-link a{color:rgba(255,255,255,.35);font-size:10px;cursor:pointer}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>公考WorkBuddy</h1>
+      <div class="sub">备考工作台 · 2027国考</div>
+    </div>
+    <div class="countdown-mini">距笔试还有<b id="side-days">—</b></div>
+    <div class="nav-scroll">
+    <div class="nav-item active" data-page="dashboard"><span class="num">1</span>每日学习看板</div>
+    <div class="nav-item" data-page="plan"><span class="num">2</span>计划统筹总模块</div>
+    <div class="nav-item" data-page="chaoge"><span class="num">3</span>超格精讲桶</div>
+    <div class="nav-item" data-page="practice"><span class="num">4</span>刷题实战统计</div>
+    <div class="nav-item" data-page="mistakes"><span class="num">5</span>难点易错台账</div>
+    <div class="nav-item" data-page="idioms"><span class="num">6</span>词语积累库</div>
+    <div class="nav-item" data-page="qiushi"><span class="num">7</span>申论精读库</div>
+    <div class="nav-item" data-page="mindmap"><span class="num">8</span>知识点思维导图</div>
+    <div class="nav-item" data-page="calendar"><span class="num">9</span>考情日历</div>
+    <div class="nav-item" data-page="notes"><span class="num">10</span>笔记聚合</div>
+    </div>
+    <div class="sync-actions">
+      <button class="btn-sync" onclick="exportData()" title="导出数据为JSON文件">📤 导出数据</button>
+      <button class="btn-sync" onclick="document.getElementById('import-file').click()" title="从JSON文件导入数据">📥 导入数据</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+    <div class="reset-link"><a onclick="resetData()">重置数据</a></div>
+  </aside>
+  <main class="main">
+    <section id="page-dashboard" class="page active"></section>
+    <section id="page-plan" class="page"></section>
+    <section id="page-chaoge" class="page"></section>
+    <section id="page-practice" class="page"></section>
+    <section id="page-mistakes" class="page"></section>
+    <section id="page-idioms" class="page"></section>
+    <section id="page-qiushi" class="page"></section>
+    <section id="page-mindmap" class="page"></section>
+    <section id="page-calendar" class="page"></section>
+    <section id="page-notes" class="page"></section>
+  </main>
+</div>
+<div id="modal-root" class="modal-mask"></div>
+<script>
+/* ========================================================
+   公考WorkBuddy 备考工作台 v2.0
+   浅绿清新风 · 10大模块 · 单文件零依赖
+======================================================== */
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtDate=d=>{const x=new Date(d);return x.getMonth()+1+'月'+x.getDate()+'日'};
+const fmtFull=d=>{const x=new Date(d);return x.getFullYear()+'年'+(x.getMonth()+1)+'月'+x.getDate()+'日'};
+const daysBetween=(d1,d2)=>Math.ceil((new Date(d2)-new Date(d1))/86400000);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function save(){localStorage.setItem('gkwb_data_v2',JSON.stringify(DB))}
+function load(){try{const s=localStorage.getItem('gkwb_data_v2');if(s)return JSON.parse(s)}catch(e){}return null}
+
+/* ============ 11时段每日时间表模板 ============ */
+const TIME_SLOTS=[
+  {time:'07:30-08:30',cat:'政治+常识',dur:60,chaoge:'常识模块听课',kua:'资料分析夸夸刷',big:'—',shi:'—',cls:'t1'},
+  {time:'08:40-09:20',cat:'词语积累',dur:40,chaoge:'判断推理听课',kua:'判断推理夸夸刷',big:'—',shi:'—',cls:'t1'},
+  {time:'09:30-10:10',cat:'资料分析+速算',dur:40,chaoge:'言语理解听课',kua:'言语理解夸夸刷',big:'—',shi:'—',cls:'t1'},
+  {time:'10:20-11:20',cat:'判断推理刷题',dur:60,chaoge:'数量关系听课',kua:'数量关系夸夸刷',big:'—',shi:'—',cls:'t2'},
+  {time:'14:00-15:00',cat:'言语理解刷题',dur:60,chaoge:'申论模块听课',kua:'常识夸夸刷',big:'—',shi:'—',cls:'t2'},
+  {time:'15:10-16:10',cat:'数量关系刷题',dur:60,chaoge:'资料分析听课',kua:'申论夸夸刷',big:'—',shi:'—',cls:'t2'},
+  {time:'16:20-17:20',cat:'申论精读',dur:60,chaoge:'—',kua:'—',big:'—',shi:'—',cls:'t3'},
+  {time:'17:30-18:10',cat:'攻坚模块专项加练',dur:40,chaoge:'—',kua:'—',big:'—',shi:'—',cls:'t3'},
+  {time:'19:00-20:30',cat:'申论每日1道小题',dur:90,chaoge:'—',kua:'—',big:'—',shi:'—',cls:'t4'},
+  {time:'20:40-21:40',cat:'整块复盘时间',dur:60,chaoge:'—',kua:'—',big:'—',shi:'—',cls:'t4'},
+  {time:'21:40-22:00',cat:'次日规划',dur:20,chaoge:'—',kua:'—',big:'—',shi:'—',cls:'t4'},
+];
+
+/* ============ 294知识点思维导图数据 ============ */
+function defaultMindmap(){
+  return {
+    '资料分析':{
+      '统计术语':['基期量 = 现期量 / (1+增长率)','现期量 = 基期量 × (1+增长率)','增长率 = 增长量 / 基期量','增长量 = 现期量 - 基期量','同比 vs 环比'],
+      '比重':['比重 = 部分 / 整体','比重变化 = 现期比重 - 基期比重','比重增量公式','基期比重 = 部分现期/整体现期 × (1+整体增长率)/(1+部分增长率)'],
+      '平均数':['平均数 = 总量 / 个数','平均数增长率','平均数增长量'],
+      '倍数':['A是B的几倍 = A/B','A比B多几倍 = A/B - 1','翻番概念'],
+      '百分数与百分点':['百分数：相对比例','百分点：绝对差值','增长率与增长百分点的区别'],
+      '混合增长率':['整体增长率介于部分之间','加权平均思想','线段法求混合增长率'],
+      '间隔增长率':['r间 = r1 + r2 + r1×r2','间隔倍数 = (1+r1)(1+r2)'],
+      '年均增长率':['末期 = 初期×(1+r)^n','n = 年份差','比较年均增长率大小'],
+      '综合分析题':['先易后难','找数据快的选项先做','注意时间单位统一'],
+    },
+    '判断推理':{
+      '图形推理-位置规律':['平移（方向、步数）','旋转（角度、方向）','翻转（轴对称）','位置叠加'],
+      '图形推理-样式规律':['遍历','加减同异','黑白叠加','属性规律（对称性/曲直/封闭）'],
+      '图形推理-数量规律':['点（交点/切点）','线（直线/曲线/一笔画）','角（锐角/直角/钝角）','面（封闭区域/面积）','素（元素种类/个数）'],
+      '图形推理-空间重构':['相对面规则','相邻面规则','公共边/公共顶点','描边法'],
+      '定义判断':['主体、客体、条件、结果','多定义比较','属种排除法','关键要件法'],
+      '类比推理-逻辑关系':['全同关系','并列关系','包含关系（属种）','交叉关系','对应关系'],
+      '类比推理-言语关系':['近义/反义','褒贬色彩','构词法'],
+      '类比推理-语法关系':['主谓关系','动宾关系','偏正关系'],
+      '逻辑判断-翻译推理':['如果...那么... → 前推后','只有...才... → 后推前','逆否命题等价','摩根定律'],
+      '逻辑判断-削弱加强':['找论点','找论据','削弱：否定论据/切断联系/另有他因','加强：补充论据/建立联系/排除他因'],
+      '逻辑判断-前提假设':['搭桥法','寻找论点论据之间的缺口'],
+      '逻辑判断-日常结论':['主题一致原则','可能优先原则','客观优先原则'],
+    },
+    '言语理解':{
+      '片段阅读-主旨概括':['找关联词（但是/因此/只有）','找主题句（首句/尾句）','行文脉络（总分/分总/总分总）','对策句常为主旨'],
+      '片段阅读-意图判断':['积极类：呼吁/倡导','消极类：解决问题','中性类：概括主旨'],
+      '片段阅读-细节理解':['偷换概念/范围/时态/逻辑','无中生有','正反混淆'],
+      '片段阅读-标题填入':['新闻类：概括核心事件','议论文：提炼论点','散文：意境契合'],
+      '片段阅读-语句排序':['首句特征（下定义/引用）','关联词捆绑','时间/逻辑顺序','尾句特征（结论/对策）'],
+      '片段阅读-语句填空':['居首：总起句','居中：过渡句','居尾：总结句'],
+      '逻辑填空-实词辨析':['词义轻重','词义范围','感情色彩','搭配习惯'],
+      '逻辑填空-成语辨析':['成语本义','适用对象','感情色彩','语境匹配'],
+      '逻辑填空-关联词':['转折：但是/然而','递进：甚至/而且','因果：因此/所以','条件：只要...就/只有...才'],
+      '篇章阅读':['先看问题再读文章','定位原文','注意标记关键信息'],
+    },
+    '数量关系':{
+      '工程问题':['常规：工作总量=效率×时间','合作：效率相加','交替：找循环周期','设工作总量为1或公倍数'],
+      '行程问题':['基础：路程=速度×时间','相遇：路程和=速度和×时间','追及：路程差=速度差×时间','流水行船：顺水=船+水，逆水=船-水','环形问题'],
+      '排列组合':['排列：有序 A(n,m)','组合：无序 C(n,m)','分类用加法','分步用乘法','隔板法/插空法/捆绑法'],
+      '概率问题':['古典概型 = 满足条件数/总数','独立事件概率相乘','对立事件概率 = 1 - 正面概率'],
+      '利润问题':['利润 = 售价 - 成本','利润率 = 利润/成本','打折 = 原价×折扣','总利润 = 单件利润×销量'],
+      '容斥原理':['两集合：A+B-A∩B','三集合标准：A+B+C-A∩B-A∩C-B∩C+A∩B∩C','三集合非标准'],
+      '几何问题':['周长/面积/体积公式','勾股定理','相似图形比例','最短路径（展开图）'],
+      '最值问题':['最不利构造：最不利+1','多集合反向构造','数据分组'],
+      '年龄问题':['年龄差不变','过了n年都长n岁'],
+      '日期问题':['平年365天/闰年366天','大月31天/小月30天','星期推算'],
+      '统筹推断':['最优方案选择','时间最短/成本最低'],
+    },
+    '常识判断':{
+      '政治':['习近平新时代中国特色社会主义思想','党的二十大报告要点','新发展理念','社会主义核心价值观','最新时政热点'],
+      '法律':['宪法：国家机构/公民权利','行政法：行政许可/行政处罚/行政复议','民法：民事行为能力/物权/合同','刑法：犯罪构成/刑罚种类','公务员法'],
+      '经济':['宏观经济：GDP/CPI/财政政策/货币政策','微观经济：供求关系/市场类型','国际经济：汇率/贸易'],
+      '历史文化':['中国古代史：朝代更替/重大事件','中国近现代史','世界史重要事件','中国传统文化：诸子百家/文学流派','传统节日与习俗'],
+      '科技':['物理常识：力学/电学/光学','化学常识：元素/反应','生物常识：细胞/遗传/生态','地理常识：气候/地形/天文','前沿科技成就'],
+    },
+    '申论':{
+      '归纳概括':['审题：对象+范围+字数','找点：关键词标注','加工：同类合并','书写：序号化+核心词前置'],
+      '综合分析':['解释型：解释含义+分析+对策/结论','评论型：表明观点+分析+总结','启示型：经验+教训'],
+      '提出对策':['直接对策：材料中提炼','间接对策：问题反推','对策表述：主体+手段+内容+目的'],
+      '应用文写作':['格式：标题/称谓/正文/落款','文体：倡议书/通知/讲话稿/调研报告','内容：发文事由+具体内容+结语'],
+      '大作文':['立意：总论点+分论点','结构：五段三分式','标题：主题词+对策/意义','开头：背景+问题+总论点','论证：举例/说理/对比','结尾：总结+升华'],
+      '素材积累':['政治建设：治理体系/党建','经济建设：高质量发展/新动能','文化建设：文化自信/传统文化','社会建设：民生/公平/治理','生态文明：绿色发展/双碳'],
+    },
+  };
+}
+
+/* ============ 超格精讲桶课程数据 ============ */
+function defaultChaoge(){
+  return {
+    '理论精讲':{name:'理论精讲',total:226,color:'green',desc:'核心理论实战班 · 5月-7月',modules:[
+      {name:'资料分析',total:23,done:3,teacher:'高照',lessons:['速算技巧','基期量与现期量','增长量','一般增长率','间隔增长率','年均增长率','乘积增长率','混合增长率','比重','平均数','倍数','综合分析'].map((n,i)=>({name:n,done:i<2}))},
+      {name:'判断推理',total:42,done:2,teacher:'程意/刘义恒',lessons:['图推-位置规律','图推-样式规律','图推-数量规律','图推-空间重构','形式逻辑1-直言命题','形式逻辑2-或且命题','形式逻辑3-假言命题','论证逻辑1-削弱','论证逻辑2-加强','论证逻辑3-前提','类比推理','定义判断'].map((n,i)=>({name:n,done:i<2}))},
+      {name:'申论',total:42,done:0,teacher:'冰哥/李崇立',lessons:['认知申论+材料阅读','归纳概括1-基础','归纳概括2-进阶','归纳概括3-综合','提出对策1','提出对策2','综合分析1','综合分析2','应用文写作1','应用文写作2','大作文-立意','大作文-论证结构'].map(n=>({name:n,done:false}))},
+      {name:'言语理解',total:46,done:1,teacher:'言小语/四诗风雅颂',lessons:['命题人思维+行文脉络','七大核心观点','中心理解题专项','标题添加+细节判断','词句理解题','语句排序','语句填空','逻辑填空-实词','逻辑填空-成语','逻辑填空-综合','篇章阅读'].map((n,i)=>({name:n,done:i<1}))},
+      {name:'数量关系',total:29,done:0,teacher:'高照',lessons:['倍数特性+方程','工程问题','行程问题','经济问题','排列组合','概率问题','容斥原理','最值问题','几何问题','溶液问题','星期日期+年龄'].map(n=>({name:n,done:false}))},
+      {name:'常识判断',total:21,done:0,teacher:'鹤峰/阿萌',lessons:['文史常识1','文史常识2','法律常识1','法律常识2','科技常识','经济常识','新法考点梳理','考前点睛'].map(n=>({name:n,done:false}))},
+      {name:'政治理论',total:23,done:0,teacher:'璐璐',lessons:['党的创新理论1','党的创新理论2','党的创新理论3','马原1','马原2','最新时政专题1','最新时政专题2','政治理论考前点睛'].map(n=>({name:n,done:false}))},
+    ]},
+    '夸夸刷':{name:'夸夸刷',total:70,color:'blue',desc:'专项强化训练 · 7月-9月',modules:[
+      {name:'资料分析',total:10,done:0,teacher:'牟立志',lessons:['基期/现期专项','增长量/率专项','间隔/年均/乘积增长率','混合增长率专项','比重专项','平均数专项','倍数专项','综合分析+易错点'].map(n=>({name:n,done:false}))},
+      {name:'判断推理',total:12,done:0,teacher:'程意/何炜健',lessons:['形式逻辑专项1','形式逻辑专项2','论证逻辑专项1','论证逻辑专项2','论证逻辑专项3','图推-黑白块专项','图推-立体拼合专项','类比+定义专项'].map(n=>({name:n,done:false}))},
+      {name:'言语理解',total:12,done:0,teacher:'言小语/夏天',lessons:['片段阅读-因果转折结构','对策类文段专项','中心理解秒杀题型','逻辑填空-语境分析','逻辑填空-词语辨析','逻辑填空400词专项'].map(n=>({name:n,done:false}))},
+      {name:'数量关系',total:10,done:0,teacher:'高照',lessons:['工程+行程专项','排列组合+概率专项','经济+容斥专项','几何+最值专项','溶液+年龄+日期专项'].map(n=>({name:n,done:false}))},
+      {name:'申论',total:10,done:0,teacher:'冰哥/李崇立',lessons:['归纳概括强化1','归纳概括强化2','归纳概括强化3','提出对策强化1','提出对策强化2','综合分析强化1','综合分析强化2','应用文强化1','应用文强化2','大作文强化'].map(n=>({name:n,done:false}))},
+      {name:'常识判断',total:8,done:0,teacher:'鹤峰/阿萌',lessons:['政治常识专项','法律常识专项','文史科技专项','时政热点专项'].map(n=>({name:n,done:false}))},
+      {name:'政治理论',total:8,done:0,teacher:'璐璐',lessons:['党的创新理论刷题1','党的创新理论刷题2','马原刷题','时政刷题'].map(n=>({name:n,done:false}))},
+    ]},
+    '超大杯':{name:'超大杯',total:50,color:'purple',desc:'考点深度突破 · 9月-10月',modules:[
+      {name:'资料分析',total:8,done:0,teacher:'高照',lessons:['增长率比较与计算','比重变化与平均数增长','倍数与比值拓展','综合分析速解','混合增长率进阶','年均增长与拉动增长'].map(n=>({name:n,done:false}))},
+      {name:'判断推理',total:10,done:0,teacher:'程意/刘义恒',lessons:['论证逻辑-因果倒置','论证逻辑-他因削弱','论证逻辑-搭桥与前提','图推-复合规律','图推-创新题型','一拖五专项突破'].map(n=>({name:n,done:false}))},
+      {name:'言语理解',total:8,done:0,teacher:'四诗风雅颂',lessons:['并列+递进结构','选项对比择优法','高频易混成语50组','篇章阅读速读法','逻辑填空语境突破'].map(n=>({name:n,done:false}))},
+      {name:'数量关系',total:8,done:0,teacher:'高照',lessons:['不定方程专题','十字交叉法','赋值法巧解','极限思维解题','排列组合拔高'].map(n=>({name:n,done:false}))},
+      {name:'申论',total:10,done:0,teacher:'冰哥/李崇立',lessons:['概括题满分技巧','对策题政府思维','分析题多角度','应用文格式突破','大作文高分框架','大作文素材活用'].map(n=>({name:n,done:false}))},
+      {name:'常识+政治',total:6,done:0,teacher:'鹤峰/璐璐',lessons:['二十大考点精讲','2027重要会议','新法速递与时政热点'].map(n=>({name:n,done:false}))},
+    ]},
+    '套卷':{name:'套卷',total:45,color:'orange',desc:'全真模考+真题演练 · 10月-11月',modules:[
+      {name:'行测真题套卷',total:15,done:0,teacher:'全名师',lessons:['2022国考行测真题','2023国考行测真题','2024国考行测真题','2025国考行测真题','2026国考行测真题','2022省考联考卷','2023省考联考卷','2024省考联考卷'].map(n=>({name:n,done:false}))},
+      {name:'申论真题套卷',total:10,done:0,teacher:'冰哥/李崇立',lessons:['2023国考申论真题','2024国考申论真题','2025国考申论真题','2026国考申论真题','省考联考申论真题1','省考联考申论真题2'].map(n=>({name:n,done:false}))},
+      {name:'超格模考卷',total:12,done:0,teacher:'全名师',lessons:['模考行测卷1','模考行测卷2','模考行测卷3','模考行测卷4','模考申论卷1','模考申论卷2','模考申论卷3'].map(n=>({name:n,done:false}))},
+      {name:'考前预测卷',total:8,done:0,teacher:'全名师',lessons:['预测行测卷1','预测行测卷2','预测申论卷1','预测申论卷2'].map(n=>({name:n,done:false}))},
+    ]},
+    '考前冲刺':{name:'考前冲刺',total:20,color:'red',desc:'考前点睛+终极预测 · 11月中下旬',modules:[
+      {name:'行测冲刺',total:10,done:0,teacher:'全名师',lessons:['高频考点终极串讲','判断推理秒杀技巧','资料分析速算冲刺','数量关系蒙题策略','言语理解考前梳理'].map(n=>({name:n,done:false}))},
+      {name:'申论冲刺',total:6,done:0,teacher:'冰哥/李崇立',lessons:['申论热点终极预测','大作文押题与模板','应用文格式速记'].map(n=>({name:n,done:false}))},
+      {name:'常识时政',total:4,done:0,teacher:'鹤峰/璐璐',lessons:['常识时政押题','政治理论核心考点','新法新规速递'].map(n=>({name:n,done:false}))},
+    ]},
+  };
+}
+
+/* ============ 默认数据 ============ */
+function defaultData(){
+  const mindmap=defaultMindmap();
+  const mmWithMaster={};
+  for(const[mod,cats]of Object.entries(mindmap)){
+    mmWithMaster[mod]={};
+    for(const[cat,points]of Object.entries(cats)){
+      mmWithMaster[mod][cat]={_expanded:mod==='资料分析',points:points.map(p=>({name:p,mastered:false}))};
+    }
+  }
+  return {
+    version:3,
+    profile:{
+      examName:'2027国考',
+      targetDate:'2026-11-30',
+      phase:'基础夯实期',
+      targetScores:{行测:75,申论:70},
+      currentScores:{行测:62,申论:55},
+      mastery:{言语:65,判断:60,数量:40,资料:55,常识:50,申论:55},
+      dailyGoal:105,
+    },
+    phases:[
+      {name:'基础夯实期',range:['2026-07-28','2026-09-30'],desc:'理论精讲→夸夸刷→超大杯考点突破主线'},
+      {name:'强化刷题期',range:['2026-10-01','2026-10-31'],desc:'超大杯考点突破+套卷真题演练'},
+      {name:'全真模考期',range:['2026-11-01','2026-11-20'],desc:'套卷模考+考前冲刺+错题滚动复盘'},
+      {name:'考前冲刺期',range:['2026-11-21','2026-11-29'],desc:'冲刺点睛+时政预测+考前心态调整'},
+    ],
+    calendar:[
+      {date:'2026-10-13',event:'2027国考公告发布',type:'key'},
+      {date:'2026-10-15',event:'报名开始',type:'key'},
+      {date:'2026-10-24',event:'报名截止',type:'key'},
+      {date:'2026-11-02',event:'缴费截止',type:'key'},
+      {date:'2026-11-24',event:'准考证打印',type:'key'},
+      {date:'2026-11-30',event:'笔试',type:'exam'},
+      {date:'2027-01-15',event:'笔试成绩查询',type:'key'},
+      {date:'2027-02-20',event:'面试开始',type:'key'},
+    ],
+    chaoge:defaultChaoge(),
+    plans:{
+      weekly:{
+        攻坚模块:'资料分析',
+        goals:[
+          {cat:'词语积累',total:35,done:0,desc:'35个新词+循环复习'},
+          {cat:'速算训练',total:7,done:0,desc:'7天每日速算打卡'},
+          {cat:'精读积累',total:7,done:0,desc:'7篇精读文章'},
+          {cat:'行测基础刷题',total:735,done:0,desc:'每日固定题量全覆盖'},
+          {cat:'模块专项加练',total:280,done:0,desc:'每日40道攻坚模块真题'},
+          {cat:'申论练习',total:7,done:0,desc:'7道小题+周末模考作文'},
+        ]
+      },
+      monthly:{
+        theme:'基础夯实：理论精讲系统学完→夸夸刷专项启动',
+        goals:['理论精讲完成80%','夸夸刷启动言语+判断','词语积累140个','精读文章20篇','行测刷题突破2000题']
+      },
+      daily:{},
+    },
+    practice:{
+      sources:['粉笔题库','超格理论','夸夸刷','超大杯+套卷'],
+      records:[
+        {date:'2026-07-22',fenbi:40,chaoge:20,kua:15,big:0},
+        {date:'2026-07-23',fenbi:55,chaoge:30,kua:10,big:0},
+        {date:'2026-07-24',fenbi:35,chaoge:25,kua:20,big:0},
+        {date:'2026-07-25',fenbi:50,chaoge:0,kua:15,big:0},
+        {date:'2026-07-26',fenbi:45,chaoge:35,kua:10,big:0},
+        {date:'2026-07-27',fenbi:30,chaoge:20,kua:10,big:0},
+        {date:'2026-07-28',fenbi:0,chaoge:0,kua:0,big:0},
+      ],
+      modules:{
+        言语:{fenbi:{c:120,r:84},chaoge:{c:50,r:35},kua:{c:30,r:22},big:{c:0,r:0}},
+        判断:{fenbi:{c:135,r:95},chaoge:{c:60,r:42},kua:{c:28,r:20},big:{c:0,r:0}},
+        数量:{fenbi:{c:60,r:30},chaoge:{c:25,r:12},kua:{c:15,r:8},big:{c:0,r:0}},
+        资料:{fenbi:{c:80,r:56},chaoge:{c:40,r:28},kua:{c:35,r:26},big:{c:0,r:0}},
+        常识:{fenbi:{c:100,r:62},chaoge:{c:45,r:28},kua:{c:20,r:14},big:{c:0,r:0}},
+      },
+    },
+    mistakes:[
+      {id:uid(),question:'某公司去年营收同比增长15%，今年比去年增长20%，则两年相比增长率为？',module:'资料',cause:'知识点不熟',analysis:'连乘增长率：(1.15×1.2)-1=38%',source:'粉笔题库',date:'2026-07-25',reviewed:[false,false,false,false]},
+      {id:uid(),question:'下列哪个成语使用正确？A.他做事锱铢必较...',module:'言语',cause:'知识点不熟',analysis:'锱铢必较：形容非常小气，贬义。此处应用"一丝不苟"',source:'夸夸刷',date:'2026-07-26',reviewed:[false,false,false,false]},
+      {id:uid(),question:'图形推理：九宫格，第一行图形交点数为1,2,3...',module:'判断',cause:'粗心',analysis:'数交点规律，第三行应为7,8,9，选C',source:'粉笔题库',date:'2026-07-27',reviewed:[false,false,false,false]},
+      {id:uid(),question:'甲乙两人合作完成一项工程，甲单独做需10天...',module:'数量',cause:'时间不够',analysis:'设工作量为1，甲效率1/10，乙1/15，合作需1/(1/10+1/15)=6天',source:'粉笔题库',date:'2026-07-27',reviewed:[false,false,false,false]},
+    ],
+    idioms:{
+      banks:[
+        {id:'bank_hs',name:'花生十三800词',icon:'\ud83e\udd5c',color:'#39D6C2',count:800,groups:[]},
+        {id:'bank_yf',name:'雨菲800词',icon:'\ud83c\udf27\ufe0f',color:'#3b82c4',count:800,groups:[]},
+        {id:'bank_cg',name:'超格400词',icon:'\ud83d\udcd0',color:'#8b5cf6',count:400,groups:[]},
+      ],
+      items:{},
+      custom:[],
+    },
+    jingdu:{
+      topics:[
+        {id:'jd_t_1',name:'高质量发展/新质生产力',icon:'\ud83d\ude80',priority:1,color:'#8FA88D',articles:[]},
+        {id:'jd_t_2',name:'基层治理',icon:'\ud83c\udfdb\ufe0f',priority:1,color:'#8FA88D',articles:[]},
+        {id:'jd_t_3',name:'乡村振兴',icon:'\ud83c\udf3e',priority:1,color:'#8FA88D',articles:[]},
+        {id:'jd_t_4',name:'民生保障',icon:'\u2764\ufe0f',priority:1,color:'#8FA88D',articles:[]},
+        {id:'jd_t_5',name:'科技创新',icon:'\ud83d\udd2c',priority:2,color:'#3b82c4',articles:[]},
+        {id:'jd_t_6',name:'生态文明',icon:'\ud83c\udf3f',priority:2,color:'#3b82c4',articles:[]},
+        {id:'jd_t_7',name:'法治建设',icon:'\u2696\ufe0f',priority:2,color:'#3b82c4',articles:[]},
+        {id:'jd_t_8',name:'文化建设',icon:'\ud83d\udcda',priority:2,color:'#3b82c4',articles:[]},
+        {id:'jd_t_9',name:'改革开放',icon:'\ud83d\udd11',priority:3,color:'#8b5cf6',articles:[]},
+        {id:'jd_t_10',name:'区域协调发展',icon:'\ud83d\uddfa\ufe0f',priority:3,color:'#8b5cf6',articles:[]},
+        {id:'jd_t_11',name:'国家安全',icon:'\ud83d\udee1\ufe0f',priority:3,color:'#8b5cf6',articles:[]},
+        {id:'jd_t_12',name:'人才强国/教育',icon:'\ud83c\udf93',priority:3,color:'#8b5cf6',articles:[]},
+        {id:'jd_t_13',name:'健康中国',icon:'\ud83c\udfe5',priority:4,color:'#39D6C2',articles:[]},
+        {id:'jd_t_14',name:'数字中国',icon:'\ud83d\udcbb',priority:4,color:'#39D6C2',articles:[]},
+        {id:'jd_t_15',name:'社会治理',icon:'\ud83e\udd1d',priority:4,color:'#39D6C2',articles:[]},
+        {id:'jd_t_16',name:'党的建设',icon:'\ud83c\udff4',priority:4,color:'#39D6C2',articles:[]},
+      ],
+      _migrated:false,
+    },
+    mindmaps:mmWithMaster,
+  };
+}
+
+let DB=load()||defaultData();
+
+// 数据版本迁移
+(function migrateVersion(){
+  if((DB.version||0)<3){
+    DB.version=3;
+    DB.chaoge=defaultChaoge();
+    save();
+  }
+})();
+
+// 旧idioms兼容
+(function migrateIdioms(){
+  if(Array.isArray(DB.idioms)){
+    DB.idioms={banks:defaultData().idioms.banks,items:{},custom:DB.idioms.map(i=>({id:i.id||uid(),word:i.word,tone:i.tone,meaning:i.meaning,example:i.example}))};
+  }
+  if(!DB.idioms.banks){DB.idioms=defaultData().idioms;}
+  if(!DB.idioms.items)DB.idioms.items={};
+  if(!DB.idioms.custom)DB.idioms.custom=[];
+})();
+
+/* ============ 种子数据：精读文章 ============ */
+(function seedJingduArticles(){
+  if(!DB.jingdu){DB.jingdu=defaultData().jingdu;}
+  if(DB.jingdu._migrated)return;
+  const tmap={};DB.jingdu.topics.forEach(t=>{tmap[t.name]=t;});
+  function addIfEmpty(topicName,article){
+    const t=tmap[topicName];if(!t||t.articles.length>0)return;
+    t.articles.push({id:uid(),...article,date:article.date||'2026-07-29',tags:article.tags||[]});
+  }
+  addIfEmpty('高质量发展/新质生产力',{
+    title:'扎扎实实以科技创新支撑和引领中国式现代化',
+    source:'人民日报',author:'人民日报评论员',url:'https://www.news.cn/politics/20260709/e16718bc307046c5a8c27773abee3bf1/c.html',date:'2026-07-10',
+    fullText:'科技兴则民族兴，科技强则国家强。习近平总书记出席国家科学技术奖励大会并发表重要讲话，围绕增强科技创新体系化攻关能力、推动科技创新和产业创新深度融合、大力培养优秀青年科技人才等部署了重点任务。中国式现代化要靠科技现代化作支撑，实现高质量发展要靠科技创新培育新动能。',
+    structure:'【是什么】科技创新是中国式现代化的核心支撑，实现高质量发展必须依靠科技创新培育新动能。\n【为什么】①"十五五"规划纲要突出科技创新引领作用。②从全球科技参与者向开拓者、引领者转变，需要更高水平科技自立自强。③经济总量跃上140万亿元新台阶，科技创新是根本支撑。\n【怎么办】①增强科技创新体系化攻关能力。②推动科技创新和产业创新深度融合。③大力培养优秀青年科技人才。',
+    template:'【科技创新类申论开头模板】\n"科技兴则民族兴，科技强则国家强。当前，我国正从全球科技参与者、贡献者向开拓者、引领者加速转变。实现高质量发展，必须牢牢把握科技的战略先导地位和根本支撑作用。"',
+    sentences:'①"科技兴则民族兴，科技强则国家强。"\n②"中国式现代化要靠科技现代化作支撑，实现高质量发展要靠科技创新培育新动能。"\n③"以高质量科技供给赋能产业创新，新质生产力勃发奔涌、高质量发展动能澎湃。"',
+    interview:'【面试可用角度】\n1. 谈科技自立自强：从"嫦娥六号"月背采样到创新药物首创突破。\n2. 谈青年科技人才：习近平总书记特别强调大力培养优秀青年科技人才。\n3. 谈新质生产力：以科技创新推动产业创新。',
+    tips:'【使用提示】\n1. 适合申论大作文"科技创新""高质量发展""新质生产力"等主题。\n2. "嫦娥六号"月背采样可作为最新案例。\n3. "140万亿元"经济总量数据可用于论证科技创新对经济发展的贡献。',
+    tags:['科技创新','高质量发展','新质生产力','科技自立自强','十五五'],
+    words:'科技自立自强、新质生产力、创新驱动、关键核心技术、体系化攻关',
+  });
+  addIfEmpty('基层治理',{
+    title:'抓好基层治理现代化这项基础性工作',
+    source:'人民日报/求是网',author:'龚维斌（中央党校）',url:'https://www.qstheory.cn/20250423/4a42370a759b4ae8b1db0d48daa2c3b1/c.html',date:'2025-04-23',
+    fullText:'基层治理是国家治理的重要组成部分，是国家治理的基石。习近平总书记强调"必须抓好基层治理现代化这项基础性工作"。坚持以党建引领基层治理，坚持服务群众、造福群众，构建共建共治共享的城乡基层治理格局，创新基层治理方式，坚持和发展新时代"枫桥经验"。',
+    structure:'【是什么】基层治理是国家治理的基石，基层治理现代化是推进国家治理现代化的重要基础性工作。\n【为什么】①社会结构深刻变革，传统治理方式面临挑战。②社会需求日益多样化个性化品质化。③夯实党的执政基础、保障人民安居乐业。\n【怎么办】五个维度：①党建引领②服务群众③共建共治共享④创新方式⑤枫桥经验。',
+    template:'【基层治理类申论开头模板】\n"基层治理是国家治理的基石。习近平总书记强调，必须抓好基层治理现代化这项基础性工作。唯有坚持党建引领、服务群众、共建共治共享，才能不断夯实基层治理根基。"',
+    sentences:'①"基层治理是国家治理的重要组成部分，是国家治理的基石。"\n②"把服务群众、造福群众作为基层治理的出发点和落脚点。"\n③"建设人人有责、人人尽责、人人享有的社会治理共同体。"',
+    interview:'【面试可用角度】\n1. 谈基层工作：基层治理是国家治理的"最后一公里"。\n2. 谈矛盾化解：新时代"枫桥经验"——"小事不出村、大事不出镇、矛盾不上交"。\n3. 谈党建引领：基层党组织是"战斗堡垒"。',
+    tips:'【使用提示】\n1. 五个维度可直接用于申论大作文结构。\n2. "自治、法治、德治"三治结合是高频考点。\n3. "枫桥经验""浦江经验""四下基层"是面试高频词汇。',
+    tags:['基层治理','党建引领','枫桥经验','共建共治共享','自治法治德治'],
+    words:'基层治理现代化、党建引领、自治法治德治、共建共治共享、枫桥经验',
+  });
+  addIfEmpty('乡村振兴',{
+    title:'用数字的犁铧深耕希望的田野',
+    source:'人民日报',author:'李洪兴',url:'https://www.peopleapp.com/column/30049252689-500006296965',date:'2025-06-04',
+    fullText:'数字化浪潮涌动，广袤乡村正经历发展蝶变。手机成"新农具"、直播成"新农活"、数据成"新农资"。从兰考智慧种田到泡桐乐器溯源，从"盒马村"以销定产到数字基础设施完善，数字的犁铧深耕着希望的田野，为乡村全面振兴注入新动能。',
+    structure:'【是什么】数字乡村建设——以数字化赋能乡村全面振兴。\n【为什么】①数字化缩小城乡差距。②数字技术赋能农业全产业链。③乡村向产业融合、文旅消费、生态涵养综合性空间转变。④但存在数字鸿沟。\n【怎么办】①补齐短板②因地制宜③提升素养④统筹推进。',
+    template:'【乡村振兴类申论开头模板】\n"手机成新农具、直播成新农活、数据成新农资——数字化浪潮正深刻改变着广袤乡村的面貌。数字的犁铧深耕着希望的田野，为乡村全面振兴注入澎湃动能。"',
+    sentences:'①"手机成新农具、直播成新农活、数据成新农资。"\n②"数字的犁铧深耕着希望的田野。"\n③"以数据要素互通推动城乡融合发展。"',
+    interview:'【面试可用角度】\n1. 谈乡村振兴：数字乡村是重要抓手，兰考案例生动具体。\n2. 谈城乡差距：承认"数字鸿沟"，提出补齐短板的具体对策。\n3. 谈产业发展："盒马村"模式——以销定产、产品追溯。',
+    tips:'【使用提示】\n1. 大量生动案例：兰考智慧种田、泡桐乐器溯源、"盒马村"以销定产。\n2. "手机→新农具、直播→新农活、数据→新农资"是近年高频金句。\n3. 注意区分"数字乡村"与"智慧农业"。',
+    tags:['乡村振兴','数字乡村','智慧农业','城乡融合','数字鸿沟'],
+    words:'数字乡村、智慧农业、城乡融合、数字鸿沟、新农人、以销定产',
+  });
+  addIfEmpty('民生保障',{
+    title:'服务随人走，发展添活力',
+    source:'人民日报',author:'李拯',url:'https://www.msweekly.com/show.html?id=185591',date:'2026-06-08',
+    fullText:'国务院印发《关于推行常住地提供基本公共服务的实施意见》，实现"服务随人走"，基本公共服务均等化水平将进一步提升。以基本公共服务均等化促进人口自由流动，让全国统一大市场更具活力。把投资于物和投资于人紧密结合，激发高质量发展活力。',
+    structure:'【是什么】基本公共服务均等化——实现"服务随人走"。\n【为什么】①打破户籍限制彰显以人民为中心。②促进人口自由流动助力统一大市场。③约2.5亿农业转移人口融入城镇化蕴藏扩内需潜力。\n【怎么办】①推广居住证互通互认。②深圳模式：过渡性住房。③杭州模式：青荷驿站。',
+    template:'【民生保障类申论开头模板】\n"民之所盼，政之所向。中国式现代化，民生为大。"服务随人走"的制度改革，不仅为民生改善写下温暖注脚，更为高质量发展注入新活力。"',
+    sentences:'①"中国式现代化，民生为大。"\n②"服务随人走，发展添活力。"\n③"投资于人既是民生改善的温情举措，更是高质量发展的有力支撑。"',
+    interview:'【面试可用角度】\n1. 谈民生改善："服务随人走"是打破户籍壁垒的重大制度创新。\n2. 谈城市竞争：深圳过渡性住房、杭州青荷驿站。\n3. 谈经济发展：2.5亿农业转移人口→城镇化→扩内需。',
+    tips:'【使用提示】\n1. "公共服务均等化"话题的绝佳素材。\n2. "投资于人 vs 投资于物"对比框架申论中非常出彩。\n3. 深圳、杭州人才安居案例可同时用于多个话题。',
+    tags:['民生保障','公共服务均等化','户籍改革','城镇化','投资于人'],
+    words:'公共服务均等化、常住地服务、户籍改革、投资于人、城镇化、全国统一大市场',
+  });
+  DB.jingdu._migrated=true;
+  save();
+})();
+
+/* ============ 种子数据：成语词库 ============ */
+(function seedIdiomBanks(){
+  if(Object.keys(DB.idioms.items||{}).length>50)return;
+  const hsGroups=[
+    {name:'改革创新',idioms:[
+      {w:'推陈出新',m:'去掉旧事物的糟粕，取其精华，并使它向新的方向发展',t:'褒义',e:'对待传统文化要推陈出新，让古老文明焕发新的生机。'},
+      {w:'革故鼎新',m:'除去旧的，建立新的',t:'褒义',e:'改革就是革故鼎新的过程，需要勇气和智慧。'},
+      {w:'与时俱进',m:'随着时代的发展而不断发展、前进',t:'褒义',e:'基层治理方式要与时俱进，善用数字化手段。'},
+      {w:'另辟蹊径',m:'另外开辟一条路，比喻另创一种风格或方法',t:'褒义',e:'面对发展瓶颈，需要另辟蹊径寻找突破口。'},
+      {w:'独树一帜',m:'比喻独特新奇，自成一家',t:'褒义',e:'这种治理模式独树一帜，值得推广借鉴。'},
+      {w:'别出心裁',m:'独创一格，与众不同',t:'褒义',e:'他的解题思路别出心裁，让人眼前一亮。'},
+    ]},
+    {name:'守旧不创新',idioms:[
+      {w:'墨守成规',m:'形容因循守旧，不肯改进',t:'贬义',e:'墨守成规只会被时代淘汰，唯有创新才能赢得未来。'},
+      {w:'抱残守缺',m:'守着残缺的东西不放，形容思想保守',t:'贬义',e:'改革不能抱残守缺，要敢于打破利益固化的藩篱。'},
+      {w:'因循守旧',m:'沿袭旧规，不思革新',t:'贬义',e:'因循守旧的管理方式已不适应新时代基层治理需求。'},
+      {w:'固步自封',m:'比喻守着老一套，不求进步',t:'贬义',e:'取得一点成绩就固步自封，最终会被赶超。'},
+    ]},
+    {name:'发展变化',idioms:[
+      {w:'方兴未艾',m:'事物正在发展，尚未达到止境',t:'褒义',e:'数字经济方兴未艾，正深刻改变着生产方式。'},
+      {w:'如火如荼',m:'像火那样红，像荼那样白，形容旺盛、热烈',t:'褒义',e:'乡村振兴建设如火如荼，农村面貌日新月异。'},
+      {w:'蒸蒸日上',m:'形容事业一天天向上发展',t:'褒义',e:'我国经济持续健康发展，各项事业蒸蒸日上。'},
+      {w:'日新月异',m:'每天都在更新，每月都有变化，形容发展进步很快',t:'褒义',e:'科技发展日新月异，人工智能应用层出不穷。'},
+      {w:'应运而生',m:'适应时机而产生',t:'中性',e:'共享经济应运而生，改变了人们的消费方式。'},
+      {w:'异军突起',m:'比喻一支新生力量突然出现',t:'褒义',e:'新能源汽车产业异军突起，成为经济增长新引擎。'},
+    ]},
+    {name:'竞争比较',idioms:[
+      {w:'相形见绌',m:'和同类事物相比较，显出不足',t:'中性',e:'与发达地区相比，欠发达地区的基础设施相形见绌。'},
+      {w:'出类拔萃',m:'超出同类之上，形容品德、才能超出一般人',t:'褒义',e:'他在众多考生中出类拔萃，以第一名成绩上岸。'},
+      {w:'脱颖而出',m:'锥尖透过布囊显露出来，比喻本领全部显露',t:'褒义',e:'基层是人才脱颖而出的沃土。'},
+      {w:'望其项背',m:'能够望见别人的颈项和背脊，表示赶得上或比得上（多用于否定）',t:'中性',e:'我国5G技术领先全球，他国难以望其项背。'},
+      {w:'相提并论',m:'把不同的人或事物不加区别地混在一起来谈论',t:'中性',e:'数字经济和传统经济不可简单相提并论。'},
+    ]},
+    {name:'学习状态',idioms:[
+      {w:'浮光掠影',m:'水面的光和掠过的影子，比喻观察不细致，印象不深',t:'贬义',e:'调研不能浮光掠影，要深入基层掌握实情。'},
+      {w:'浅尝辄止',m:'略微尝试一下就停下来，指不深入钻研',t:'贬义',e:'学习最忌讳浅尝辄止，必须持之以恒。'},
+      {w:'举一反三',m:'从一件事情类推而知道其他许多事情',t:'褒义',e:'做题要善于举一反三，掌握一类题的解法。'},
+      {w:'融会贯通',m:'把各方面的知识和道理融化汇合，得到全面透彻的理解',t:'褒义',e:'学习各模块知识后要融会贯通，形成体系。'},
+      {w:'潜移默化',m:'人的思想、性格在不知不觉中受到感染而发生变化',t:'中性',e:'良好的家风对孩子的成长起着潜移默化的作用。'},
+      {w:'耳濡目染',m:'耳朵经常听到，眼睛经常看到，不知不觉地受到影响',t:'中性',e:'在基层工作多年，耳濡目染，他对群众工作有了深刻理解。'},
+    ]},
+    {name:'合作配合',idioms:[
+      {w:'相辅相成',m:'两件事物互相配合，互相辅助，缺一不可',t:'褒义',e:'经济发展与民生改善相辅相成，不可偏废。'},
+      {w:'相得益彰',m:'互相帮助，互相补充，更能显出各自长处',t:'褒义',e:'传统媒体与新媒体融合，相得益彰。'},
+      {w:'珠联璧合',m:'珍珠串在一起，美玉合在一块儿，比喻杰出的人才或美好的事物结合在一起',t:'褒义',e:'产学研珠联璧合，加速科技成果转化。'},
+      {w:'并行不悖',m:'同时进行，不相冲突',t:'中性',e:'发展与安全并行不悖，要统筹兼顾。'},
+      {w:'齐头并进',m:'多方面同时前进，形容几件事情同时进行',t:'褒义',e:'经济建设与生态文明建设齐头并进。'},
+    ]},
+    {name:'错误做法',idioms:[
+      {w:'本末倒置',m:'把根本的事和枝节的事弄颠倒了',t:'贬义',e:'先污染后治理是本末倒置的发展方式。'},
+      {w:'舍本逐末',m:'抛弃根本，追求枝节',t:'贬义',e:'只追求GDP增长而忽视民生，是舍本逐末。'},
+      {w:'南辕北辙',m:'想往南而车子却向北行，比喻行动与目的相反',t:'贬义',e:'一边喊着减负一边层层加码，无异于南辕北辙。'},
+      {w:'缘木求鱼',m:'爬到树上去找鱼，比喻方向方法错误',t:'贬义',e:'不从根本上解决问题，只是缘木求鱼。'},
+      {w:'拔苗助长',m:'比喻违反事物发展规律，急于求成',t:'贬义',e:'人才培养不能拔苗助长，要尊重成长规律。'},
+      {w:'削足适履',m:'比喻不合理地迁就现成条件，或不顾具体条件生搬硬套',t:'贬义',e:'政策执行不能削足适履，要因地制宜。'},
+    ]},
+    {name:'作风态度',idioms:[
+      {w:'兢兢业业',m:'形容做事谨慎、勤恳',t:'褒义',e:'基层干部兢兢业业，把群众的事当成自己的事。'},
+      {w:'如履薄冰',m:'像走在薄冰上一样，比喻行事极为谨慎',t:'中性',e:'权力越大责任越大，行使权力当如履薄冰。'},
+      {w:'殚精竭虑',m:'用尽精力，费尽心思',t:'褒义',e:'一代代科学家殚精竭虑，才有了今天的科技成就。'},
+      {w:'呕心沥血',m:'比喻用尽心思（多用于文艺创作或科学研究）',t:'褒义',e:'这部作品是作者呕心沥血之作。'},
+      {w:'孜孜不倦',m:'勤奋努力，不知疲倦',t:'褒义',e:'他孜孜不倦地钻研业务，很快成为技术骨干。'},
+      {w:'脚踏实地',m:'脚踏在坚实的土地上，比喻做事踏实认真',t:'褒义',e:'青年人要脚踏实地，一步一个脚印地前进。'},
+    ]},
+    {name:'正确做法',idioms:[
+      {w:'抽丝剥茧',m:'丝得一根一根地抽，茧得一层一层地剥，形容分析事物极为细致且有层次',t:'褒义',e:'调查组抽丝剥茧，终于查明了事故原因。'},
+      {w:'提纲挈领',m:'抓住网的总绳，提住衣的领子，比喻抓住要领',t:'褒义',e:'他的发言提纲挈领，把复杂问题讲得很清楚。'},
+      {w:'厚积薄发',m:'多多积蓄，慢慢放出，形容只有准备充分才能办好事情',t:'褒义',e:'科研工作需要厚积薄发，不能急功近利。'},
+      {w:'当仁不让',m:'遇到应该做的事就积极主动去做，不推让',t:'褒义',e:'面对急难险重任务，党员干部当仁不让。'},
+      {w:'义不容辞',m:'道义上不允许推辞',t:'褒义',e:'保障和改善民生是政府义不容辞的责任。'},
+    ]},
+    {name:'影响教育',idioms:[
+      {w:'振聋发聩',m:'声音很大，使耳聋的人也听得见，比喻用语言文字唤醒糊涂麻木的人',t:'褒义',e:'总书记的讲话振聋发聩，指明了前进方向。'},
+      {w:'醍醐灌顶',m:'比喻听了高明的意见使人受到很大启发',t:'褒义',e:'听了专家的分析，我如醍醐灌顶，豁然开朗。'},
+      {w:'循循善诱',m:'善于有步骤地引导别人学习',t:'褒义',e:'好的老师善于循循善诱，激发学生思考。'},
+      {w:'诲人不倦',m:'教导人特别耐心，从不厌倦',t:'褒义',e:'老专家诲人不倦的精神令人敬佩。'},
+    ]},
+    {name:'处境困难',idioms:[
+      {w:'举步维艰',m:'迈步艰难，比喻办事情每向前一步都十分不容易',t:'中性',e:'小微企业在疫情后举步维艰，亟需政策扶持。'},
+      {w:'寸步难行',m:'形容走路困难，也比喻处境艰难',t:'中性',e:'没有核心技术，企业在国际竞争中寸步难行。'},
+      {w:'进退两难',m:'前进和后退都难，比喻处境困难',t:'中性',e:'面对两难抉择，决策者陷入进退两难的境地。'},
+      {w:'骑虎难下',m:'骑在老虎背上不能下来，比喻事情中途遇到困难但又不能停止',t:'贬义',e:'项目已投入大量资金，现在骑虎难下。'},
+    ]},
+  ];
+  const yfGroups=[
+    {name:'易混成语辨析（一）',idioms:[
+      {w:'不以为然',m:'不认为是对的，表示不同意（多含轻视意）',t:'中性',e:'他对这个方案不以为然，提出了修改意见。'},
+      {w:'不以为意',m:'不把它放在心上，表示对人、对事抱轻视态度',t:'贬义',e:'对安全隐患绝不能不以为意，必须立行立改。'},
+      {w:'首当其冲',m:'比喻最先受到攻击或遭到灾难',t:'中性',e:'小微企业首当其冲受到疫情冲击。'},
+      {w:'一马当先',m:'作战时策马冲锋在前，形容领先或带头',t:'褒义',e:'党员干部在危难时刻要一马当先。'},
+      {w:'无可厚非',m:'不能过分责备，指说话做事虽有缺点但还有可取之处',t:'中性',e:'年轻人经验不足无可厚非，关键是肯学肯干。'},
+      {w:'无可非议',m:'没有什么可以指责的，表示做得妥当',t:'褒义',e:'他的工作态度无可非议，值得大家学习。'},
+    ]},
+    {name:'易混成语辨析（二）',idioms:[
+      {w:'不刊之论',m:'比喻不能改动或不可磨灭的言论',t:'褒义',e:'实践是检验真理的唯一标准，这是不刊之论。'},
+      {w:'不易之论',m:'内容正确、不可更改的言论',t:'褒义',e:'专家提出的这些原则已是学界的不易之论。'},
+      {w:'差强人意',m:'大体上还能使人满意',t:'中性',e:'这次考试成绩差强人意，还需继续努力。'},
+      {w:'不尽人意',m:'不完全使人满意',t:'贬义',e:'政策的落实情况不尽人意，需要加大督查力度。'},
+      {w:'万人空巷',m:'家家户户的人都从巷里出来了，形容庆祝、欢迎等盛况',t:'褒义',e:'国庆当天万人空巷，群众自发涌上街头庆祝。'},
+      {w:'门可罗雀',m:'大门前面可以张网捕雀，形容宾客稀少，十分冷落',t:'贬义',e:'曾经热闹的商业街如今门可罗雀。'},
+    ]},
+    {name:'易混成语辨析（三）',idioms:[
+      {w:'不胫而走',m:'没有腿却能跑，比喻事物无需推行就已迅速地传播开去',t:'中性',e:'好消息不胫而走，整个村子都知道了。'},
+      {w:'不翼而飞',m:'没有翅膀却飞走了，比喻物品忽然丢失或事情传播迅速',t:'中性',e:'办公室的电脑不翼而飞，原来是被人借走了。'},
+      {w:'目不暇接',m:'东西太多，眼睛看不过来',t:'中性',e:'博览会上展品琳琅满目，令人目不暇接。'},
+      {w:'应接不暇',m:'原形容景物繁多来不及观赏，后形容来人或事情太多应付不过来',t:'中性',e:'政务大厅人满为患，工作人员应接不暇。'},
+      {w:'琳琅满目',m:'满眼都是珍贵的东西，形容美好的事物很多',t:'褒义',e:'科技成果展上，创新产品琳琅满目。'},
+      {w:'美不胜收',m:'美好的东西太多，一时看不过来',t:'褒义',e:'乡村振兴示范村里美景美不胜收。'},
+    ]},
+    {name:'程度轻重辨析',idioms:[
+      {w:'无可挽回',m:'无法挽回，程度最重',t:'贬义',e:'生态破坏一旦造成，有些损失是无可挽回的。'},
+      {w:'难以挽回',m:'很难挽回',t:'贬义',e:'错过最佳时机，局面就难以挽回了。'},
+      {w:'于事无补',m:'对事情没有什么益处',t:'贬义',e:'事后再后悔已于事无补，关键在于事前预防。'},
+      {w:'杯水车薪',m:'用一杯水去救一车着火的柴草，比喻力量太小无济于事',t:'贬义',e:'仅靠财政拨款杯水车薪，需要引入社会资本。'},
+      {w:'无济于事',m:'对事情没有什么帮助或益处',t:'贬义',e:'光说不做，再好的规划也无济于事。'},
+      {w:'回天乏术',m:'比喻局势或病情严重，已无法挽救',t:'贬义',e:'错失最佳治疗时机，医生也回天乏术。'},
+    ]},
+  ];
+  const cgGroups=[
+    {name:'核心必背（一）',idioms:[
+      {w:'一蹴而就',m:'踏一步就成功，比喻事情轻而易举一下子就成功',t:'贬义（多用于否定）',e:'乡村振兴不可能一蹴而就，需要久久为功。'},
+      {w:'立竿见影',m:'在阳光下把竿子竖起来，立刻就看到影子，比喻立刻见到功效',t:'中性',e:'政策效果不会立竿见影，需要一段时间才能显现。'},
+      {w:'一劳永逸',m:'辛苦一次把事情办好，以后就可以不再费力了',t:'中性',e:'社会治理没有一劳永逸的办法，需要持续创新。'},
+      {w:'釜底抽薪',m:'把柴火从锅底抽掉，比喻从根本上解决问题',t:'褒义',e:'治理环境污染要釜底抽薪，从源头控制排放。'},
+      {w:'标本兼治',m:'对事物的枝节和根本都加以治理',t:'褒义',e:'解决食品安全问题要标本兼治。'},
+      {w:'正本清源',m:'从根本上整顿，从源头上清理',t:'褒义',e:'整顿市场秩序要正本清源，铲除灰色产业链。'},
+    ]},
+    {name:'核心必背（二）',idioms:[
+      {w:'未雨绸缪',m:'天还没有下雨，先把门窗绑牢，比喻事先做好准备工作',t:'褒义',e:'防汛工作要未雨绸缪，不能等灾情发生再行动。'},
+      {w:'防微杜渐',m:'在错误或坏事刚萌发时就加以制止，不让它发展',t:'褒义',e:'安全生产要防微杜渐，把隐患消灭在萌芽状态。'},
+      {w:'居安思危',m:'处在安乐的环境中要想到可能有的危险',t:'褒义',e:'越是形势大好，越要居安思危。'},
+      {w:'有备无患',m:'事先有准备就可以避免祸患',t:'褒义',e:'应急预案要常备不懈，做到有备无患。'},
+      {w:'亡羊补牢',m:'丢失了羊再去修补羊圈，比喻出了问题后想办法补救',t:'中性',e:'虽然这次没考好，但亡羊补牢为时不晚。'},
+      {w:'曲突徙薪',m:'把烟囱改建成弯的，搬开灶旁的柴火，比喻事先采取措施防患于未然',t:'褒义',e:'安全管理要曲突徙薪，不能等事故发生再追责。'},
+    ]},
+    {name:'高频实词辨析',idioms:[
+      {w:'彰显',m:'鲜明地显示',t:'褒义',e:'这项改革彰显了以人民为中心的发展理念。'},
+      {w:'凸显',m:'清楚地显露',t:'中性',e:'数据凸显了城乡差距仍然存在的现实。'},
+      {w:'制约',m:'限制约束',t:'中性',e:'基础设施薄弱制约了当地经济发展。'},
+      {w:'束缚',m:'捆绑，使受到约束限制（多用于抽象事物）',t:'贬义',e:'打破思想束缚，勇于改革创新。'},
+      {w:'积淀',m:'长期积累沉淀（多用于文化、知识等正面事物）',t:'褒义',e:'中华优秀传统文化是几千年积淀下来的瑰宝。'},
+      {w:'沉淀',m:'溶液中难溶解的物质沉到溶液底层，比喻凝聚积累',t:'中性',e:'这些经验需要时间沉淀，才能形成系统的理论。'},
+    ]},
+  ];
+  const allItems={};
+  function addBank(bankId,groups){
+    const bank=DB.idioms.banks.find(b=>b.id===bankId);
+    if(!bank)return;
+    bank.groups=groups.map((g,i)=>({
+      id:bankId+'_g'+i,
+      name:g.name,
+      idioms:g.idioms.map(item=>{
+        const id=uid();
+        allItems[id]={...item,id,source:bankId,group:g.name};
+        return id;
+      })
+    }));
+  }
+  addBank('bank_hs',hsGroups);
+  addBank('bank_yf',yfGroups);
+  addBank('bank_cg',cgGroups);
+  DB.idioms.items=allItems;
+  save();
+})();
+
+/* ============ 阶段与每日推送 ============ */
+function getCurrentPhase(date){
+  for(const p of DB.phases){if(date>=p.range[0]&&date<=p.range[1])return p}
+  return DB.phases[DB.phases.length-1];
+}
+
+function getDaily(date){
+  if(!DB.plans.daily[date]){
+    const phase=getCurrentPhase(date);
+    const slots=TIME_SLOTS.map((s,i)=>({...s,done:false}));
+    DB.plans.daily[date]={phase:phase.name,slots:slots,habits:{阅读:false,速算:false,词语:false,错题:false,复盘:false}};
+    save();
+  }
+  return DB.plans.daily[date];
+}
+
+/* ============ 渲染：每日学习看板 ============ */
+function renderDashboard(){
+  const p=DB.profile;
+  const days=daysBetween(today(),p.targetDate);
+  const phase=getCurrentPhase(today());
+  const daily=getDaily(today());
+  $('#side-days').textContent=days+'天';
+  const doneSlots=daily.slots.filter(s=>s.done).length;
+  const slotPct=Math.round(doneSlots/daily.slots.length*100);
+  const habitsDone=Object.values(daily.habits).filter(Boolean).length;
+  const weekDates=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);weekDates.push(d.toISOString().slice(0,10))}
+
+  $('#page-dashboard').innerHTML=`
+    <div class="page-header">
+      <div><h2>每日学习看板</h2><div class="sub">${fmtFull(today())} · ${phase.name}</div></div>
+      <div class="flex" style="gap:6px"><button class="btn ghost sm" onclick="resetToday()">重新生成今日</button></div>
+    </div>
+    <div class="phase-steps">
+      ${DB.phases.map(ph=>{
+        const isCur=ph.name===phase.name;const isDone=today()>ph.range[1];
+        return '<div class="phase-step '+(isCur?'active':isDone?'done':'')+'"><div class="ph-name">'+ph.name+'</div><div class="ph-range">'+fmtDate(ph.range[0])+'-'+fmtDate(ph.range[1])+'</div></div>';
+      }).join('')}
+    </div>
+    <div class="grid grid-3" style="grid-template-columns:1fr 1fr 1.2fr">
+      <div class="countdown-box">
+        <div class="days">${days}</div>
+        <div class="days-label">距离${p.examName}笔试</div>
+        <div class="phase">${phase.name}</div>
+        <div class="target">${fmtDate(p.targetDate)} · 目标 行测${p.targetScores.行测}/申论${p.targetScores.申论}</div>
+      </div>
+      <div class="card">
+        <h3>今日任务完成度 <span class="tag">${doneSlots}/${daily.slots.length}</span></h3>
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+            <circle class="ring-fg ${slotPct>=80?'success':slotPct<40?'warn':''}" cx="50" cy="50" r="42" stroke-dasharray="${2*Math.PI*42}" stroke-dashoffset="${2*Math.PI*42*(1-slotPct/100)}"></circle>
+            <text class="ring-val" x="50" y="46" text-anchor="middle" dominant-baseline="middle">${slotPct}%</text>
+            <text class="ring-text" x="50" y="60" text-anchor="middle">时段完成</text>
+          </svg>
+          <div class="ring-info"><div class="num">${doneSlots}<span style="font-size:13px;color:var(--text-muted)">/${daily.slots.length}</span></div><div class="lbl">今日刷题目标 ${p.dailyGoal}题</div><div class="mt-8"><a onclick="nav(\'plan\')" style="font-size:12px">查看完整计划 →</a></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>每日习惯 <span class="tag">${habitsDone}/5</span></h3>
+        <div class="habit-list">
+          ${Object.entries(daily.habits).map(([k,v])=>'<div class="habit '+(v?'done':'')+'" onclick="toggleHabit(\''+k+'\')"><div class="check">\u2713</div><div class="h-name">'+habitName(k)+'</div></div>').join('')}
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-3 mt-16">
+      <div class="card">
+        <h3>目标分差距</h3>
+        ${Object.entries(p.targetScores).map(([k,tgt])=>{
+          const cur=p.currentScores[k]||0;const gap=tgt-cur;const pct=Math.round(cur/tgt*100);
+          return '<div style="margin-bottom:12px"><div class="flex between mb-6"><span class="text-bold">'+k+'</span><span class="text-sm">'+cur+'/'+tgt+' <span style="color:'+(gap>10?'var(--danger)':gap>5?'var(--warn)':'var(--success)')+'">差'+gap+'</span></span></div><div class="progress"><div class="'+(pct>=90?'success':pct<70?'warn':'')+'" style="width:'+pct+'%"></div></div></div>';
+        }).join('')}
+        <button class="btn ghost sm mt-8" onclick="editScores()">编辑分数</button>
+      </div>
+      <div class="card" style="grid-column:span 2">
+        <h3>各模块掌握度雷达图</h3>
+        <div class="flex" style="gap:20px;align-items:center;flex-wrap:wrap">
+          ${radarChart(p.mastery)}
+          <div class="flex wrap" style="gap:14px;flex:1;min-width:200px">
+            ${Object.entries(p.mastery).map(([k,v])=>'<div style="text-align:center;min-width:55px"><div class="text-bold text-primary" style="font-size:18px">'+v+'%</div><div class="text-xs text-muted">'+k+'</div></div>').join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-16">
+      <h3>今日学习时间表 · 11时段 <span class="tag">${phase.name}</span></h3>
+      <div style="overflow-x:auto">
+        <table class="four-col-table">
+          <thead><tr><th>时段</th><th>任务</th><th>时长</th><th>精讲桶听课</th><th>夸夸刷</th><th>超大杯</th><th>实战桶</th><th>状态</th></tr></thead>
+          <tbody>
+            ${daily.slots.map((s,i)=>'<tr><td class="col-time">'+s.time+'</td><td class="col-task">'+esc(s.cat)+'</td><td class="col-dur">'+s.dur+'min</td><td>'+esc(s.chaoge)+'</td><td>'+esc(s.kua)+'</td><td>'+esc(s.big)+'</td><td>'+esc(s.shi)+'</td><td><button class="tt-btn '+(s.done?'done':'')+'" onclick="toggleSlot('+i+')">'+(s.done?'已完成':'标记完成')+'</button></td></tr>').join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid grid-2 mt-16">
+      <div class="card">
+        <h3>本周学习热力图</h3>
+        <div class="heatmap">
+          ${weekDates.map(d=>{
+            const h=DB.plans.daily[d];if(!h)return '<div class="heat-cell"><div>'+new Date(d).getDate()+'</div></div>';
+            const done=h.slots.filter(s=>s.done).length;const pct=done/h.slots.length;
+            const lvl=pct===0?'':pct<.3?'l1':pct<.6?'l2':pct<.9?'l3':'l4';
+            return '<div class="heat-cell '+lvl+'"><div>'+new Date(d).getDate()+'</div></div>';
+          }).join('')}
+        </div>
+        <div class="flex between mt-8 text-xs text-muted"><span>少</span><div class="flex" style="gap:3px"><div class="heat-cell" style="width:13px;height:13px"></div><div class="heat-cell l1" style="width:13px;height:13px"></div><div class="heat-cell l2" style="width:13px;height:13px"></div><div class="heat-cell l3" style="width:13px;height:13px"></div><div class="heat-cell l4" style="width:13px;height:13px"></div></div><span>多</span></div>
+      </div>
+      <div class="card">
+        <h3>各模块听课分配 <span class="tag">今日</span></h3>
+        <div class="grid grid-3" style="gap:8px">
+          ${['资料','判断','言语','数量','常识','申论'].map(m=>'<div style="text-align:center;padding:10px;background:var(--primary-bg);border-radius:7px"><div class="text-bold text-primary">'+m+'</div><div class="text-xs text-muted">1节</div></div>').join('')}
+        </div>
+        <div class="divider"></div>
+        <h3 style="font-size:13px">重点击破题型</h3>
+        <div class="flex wrap" style="gap:6px"><span class="tag red">图推</span><span class="tag yellow">逻辑填空</span><span class="tag blue">资料速算</span></div>
+        <div class="divider"></div>
+        <h3 style="font-size:13px">艾宾浩斯复习</h3>
+        <div class="text-sm">复习第1/2/4/7天词语共15个 <a onclick="nav(\'idioms\')" style="font-size:12px">前往词语库 →</a></div>
+      </div>
+    </div>
+  `;
+}
+
+function habitName(k){return {阅读:'每日阅读',速算:'速算练习',词语:'词语积累',错题:'错题复盘',复盘:'当日复盘'}[k]||k}
+function toggleSlot(i){const d=getDaily(today());d.slots[i].done=!d.slots[i].done;save();renderDashboard()}
+function toggleHabit(k){const d=getDaily(today());d.habits[k]=!d.habits[k];save();renderDashboard()}
+function resetToday(){if(confirm('重新生成今日任务？')){delete DB.plans.daily[today()];getDaily(today());save();renderDashboard()}}
+
+function editScores(){
+  const p=DB.profile;
+  showModal('<h3>编辑目标与当前分数</h3><div class="form-row"><div><label>行测目标分</label><input class="input" id="m-xm-tgt" value="'+p.targetScores.行测+'"></div><div><label>行测当前分</label><input class="input" id="m-xm-cur" value="'+p.currentScores.行测+'"></div></div><div class="form-row"><div><label>申论目标分</label><input class="input" id="m-sl-tgt" value="'+p.targetScores.申论+'"></div><div><label>申论当前分</label><input class="input" id="m-sl-cur" value="'+p.currentScores.申论+'"></div></div><div class="form-row"><div><label>每日刷题目标</label><input type="number" class="input" id="m-goal" value="'+p.dailyGoal+'"></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveScores()">保存</button></div>');
+}
+function saveScores(){
+  DB.profile.targetScores.行测=+$('#m-xm-tgt').value||0;DB.profile.currentScores.行测=+$('#m-xm-cur').value||0;
+  DB.profile.targetScores.申论=+$('#m-sl-tgt').value||0;DB.profile.currentScores.申论=+$('#m-sl-cur').value||0;
+  DB.profile.dailyGoal=+$('#m-goal').value||100;
+  save();closeModal();renderDashboard();
+}
+
+/* ============ 雷达图 ============ */
+function radarChart(data){
+  const entries=Object.entries(data);const n=entries.length;
+  const cx=140,cy=120,R=88;
+  const angles=entries.map((_,i)=>-Math.PI/2+i*2*Math.PI/n);
+  let grid='';
+  for(const r of [.25,.5,.75,1]){
+    const pts=angles.map(a=>cx+Math.cos(a)*R*r+','+(cy+Math.sin(a)*R*r)).join(' ');
+    grid+='<polygon points="'+pts+'" fill="none" stroke="#ddd8cc" stroke-width="1"/>';
+  }
+  let axes=angles.map((a,i)=>{
+    const x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+    const lx=cx+Math.cos(a)*(R+14),ly=cy+Math.sin(a)*(R+14);
+    return '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#ddd8cc"/><text x="'+lx+'" y="'+ly+'" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#7a7268">'+entries[i][0]+'</text>';
+  }).join('');
+  const dataPts=entries.map((e,i)=>{const v=e[1]/100;return cx+Math.cos(angles[i])*R*v+','+(cy+Math.sin(angles[i])*R*v)}).join(' ');
+  const dots=entries.map((e,i)=>{const v=e[1]/100;return '<circle cx="'+(cx+Math.cos(angles[i])*R*v)+'" cy="'+(cy+Math.sin(angles[i])*R*v)+'" r="3" fill="#8FA88D"/>'}).join('');
+  return '<svg viewBox="0 0 280 240" style="width:240px;height:auto">'+grid+axes+'<polygon points="'+dataPts+'" fill="rgba(120,110,95,0.15)" stroke="#8FA88D" stroke-width="2"/>'+dots+'</svg>';
+}
+
+/* ============ 渲染：计划统筹 ============ */
+function renderPlan(){
+  const phase=getCurrentPhase(today());
+  $('#page-plan').innerHTML=`
+    <div class="page-header"><div><h2>计划统筹总模块</h2><div class="sub">当前阶段：${phase.name} · ${fmtDate(phase.range[0])}-${fmtDate(phase.range[1])}</div></div></div>
+    <div class="phase-steps">
+      ${DB.phases.map(ph=>{const isCur=ph.name===phase.name;const isDone=today()>ph.range[1];return '<div class="phase-step '+(isCur?'active':isDone?'done':'')+'"><div class="ph-name">'+ph.name+'</div><div class="ph-range">'+fmtDate(ph.range[0])+'-'+fmtDate(ph.range[1])+'</div></div>';}).join('')}
+    </div>
+    <div class="card">
+      <h3>阶段说明</h3>
+      <div class="grid grid-4">
+        ${DB.phases.map(ph=>'<div style="padding:12px;background:var(--primary-bg);border-radius:8px"><div class="text-bold text-primary">'+ph.name+'</div><div class="text-xs text-muted mt-6">'+esc(ph.desc)+'</div></div>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="grid grid-4">
+        <div><span class="tag green">精讲桶主线</span><div class="text-sm mt-6">理论精讲→夸夸刷→超大杯→冲刺</div></div>
+        <div><span class="tag blue">实战桶定位</span><div class="text-sm mt-6">仅刷配套习题，不系统听课</div></div>
+        <div><span class="tag yellow">每日模块</span><div class="text-sm mt-6">6模块全部覆盖，无空白</div></div>
+        <div><span class="tag purple">自主规划</span><div class="text-sm mt-6">不跟超格课表，自主分配</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchPlanTab(this,\'day\')">日计划</div>
+        <div class="tab" onclick="switchPlanTab(this,\'week\')">周计划</div>
+        <div class="tab" onclick="switchPlanTab(this,\'month\')">月计划</div>
+      </div>
+      <div id="plan-tab-content">${renderDayPlan()}</div>
+    </div>
+  `;
+}
+function switchPlanTab(el,tab){
+  $$('#page-plan .tab-bar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const content=tab==='day'?renderDayPlan():tab==='week'?renderWeekPlan():renderMonthPlan();
+  $('#plan-tab-content').innerHTML=content;
+}
+
+function renderDayPlan(){
+  const daily=getDaily(today());
+  return '<h3 style="font-size:14px">日计划表 · 每日六大任务板块</h3><p class="text-sm text-muted mb-12">精讲桶+夸夸刷+超大杯+实战桶全覆盖</p><div style="overflow-x:auto"><table class="four-col-table"><thead><tr><th>任务大类</th><th>计划时长</th><th>精讲桶当日听课</th><th>当日夸夸刷任务</th><th>超大杯套卷</th><th>实战桶配套</th><th>状态</th></tr></thead><tbody>'+
+    daily.slots.map((s,i)=>'<tr><td class="fc-cat">'+esc(s.cat)+'</td><td>'+s.dur+'min</td><td>'+esc(s.chaoge)+'</td><td>'+esc(s.kua)+'</td><td>'+esc(s.big)+'</td><td>'+esc(s.shi)+'</td><td><button class="tt-btn '+(s.done?'done':'')+'" onclick="toggleSlotPlan('+i+')">'+(s.done?'已完成':'待完成')+'</button></td></tr>').join('')+
+    '</tbody></table></div>';
+}
+function toggleSlotPlan(i){const d=getDaily(today());d.slots[i].done=!d.slots[i].done;save();renderPlan();switchPlanTab($$('#page-plan .tab-bar .tab')[0],'day')}
+
+function renderWeekPlan(){
+  const w=DB.plans.weekly;
+  const total=w.goals.reduce((s,g)=>s+g.total,0);
+  const done=w.goals.reduce((s,g)=>s+g.done,0);
+  return '<h3 style="font-size:14px">周计划表 · 本周攻坚模块：<span class="tag red">'+w.攻坚模块+'</span></h3><div class="flex between mb-12"><span class="text-sm text-muted">总进度 '+done+'/'+total+'</span><span class="tag blue">'+Math.round(done/total*100)+'%</span></div><div class="progress mb-12"><div style="width:'+done/total*100+'%"></div></div><div style="overflow-x:auto"><table class="data"><thead><tr><th>目标板块</th><th>周总任务量</th><th>已完成</th><th>进度</th><th>待完成</th><th>精讲桶</th><th>夸夸刷</th><th>超大杯</th><th>实战桶</th></tr></thead><tbody>'+
+    w.goals.map((g,i)=>{
+      const pct=g.total?Math.round(g.done/g.total*100):0;
+      return '<tr><td class="text-bold">'+g.cat+'</td><td class="text-sm">'+esc(g.desc)+'</td><td><input type="number" value="'+g.done+'" style="width:50px;padding:3px;border:1px solid var(--border);border-radius:4px" onchange="updateWeekGoal('+i+',this.value)"></td><td><div class="progress" style="width:60px"><div class="'+(pct>=80?'success':pct<40?'warn':'')+'" style="width:'+pct+'%"></div></div></td><td>'+(g.total-g.done)+'</td><td class="text-sm">'+weekDetail(g.cat,'chaoge')+'</td><td class="text-sm">'+weekDetail(g.cat,'kua')+'</td><td class="text-sm">'+weekDetail(g.cat,'big')+'</td><td class="text-sm">'+weekDetail(g.cat,'shi')+'</td></tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
+function weekDetail(cat,type){
+  const m={词语积累:{chaoge:'无',kua:'无',big:'无',shi:'无'},速算训练:{chaoge:'资料速算小节',kua:'资料夸夸刷速算',big:'资料套卷计算复盘',shi:'实战资料计算'},精读积累:{chaoge:'申论素材课',kua:'申论素材夸夸刷',big:'申论套卷素材',shi:'无'},行测基础刷题:{chaoge:'5大模块听课',kua:'分模块夸夸刷',big:'每周2套真题',shi:'每日10-20道'},模块专项加练:{chaoge:'攻坚模块课',kua:'攻坚夸夸刷',big:'攻坚套卷复盘',shi:'疯狂2500'},申论练习:{chaoge:'申论课',kua:'申论夸夸刷',big:'周末模考作文',shi:'申论实战'}}[cat]||{};
+  return m[type]||'—';
+}
+function updateWeekGoal(i,v){DB.plans.weekly.goals[i].done=Math.min(+v,DB.plans.weekly.goals[i].total);save();renderPlan();switchPlanTab($$('#page-plan .tab-bar .tab')[1],'week')}
+
+function renderMonthPlan(){
+  const m=DB.plans.monthly;
+  return '<h3 style="font-size:14px">月计划表</h3><div class="form-row"><div><label>本月主题</label><input class="input" value="'+esc(m.theme)+'" onchange="DB.plans.monthly.theme=this.value;save()"></div></div><div><label>本月目标</label></div>'+
+    m.goals.map((g,i)=>'<div class="flex mb-8" style="gap:6px"><input class="input" value="'+esc(g)+'" onchange="DB.plans.monthly.goals['+i+']=this.value;save()"><button class="btn ghost sm" onclick="DB.plans.monthly.goals.splice('+i+',1);save();renderPlan();switchPlanTab($$(\'#page-plan .tab-bar .tab\')[2],\'month\')">\u00d7</button></div>').join('')+
+    '<button class="btn ghost sm mt-8" onclick="DB.plans.monthly.goals.push(\'新目标\');save();renderPlan();switchPlanTab($$(\'#page-plan .tab-bar .tab\')[2],\'month\')">+ 添加目标</button>';
+}
+
+/* ============ 渲染：超格精讲桶 ============ */
+function renderChaoge(){
+  const layers=DB.chaoge;
+  const allModules=Object.values(layers).flatMap(l=>l.modules);
+  const totalDone=allModules.reduce((s,m)=>s+m.done,0);
+  const totalAll=allModules.reduce((s,m)=>s+m.total,0);
+  const pct=Math.round(totalDone/totalAll*100);
+
+  $('#page-chaoge').innerHTML=`
+    <div class="page-header"><div><h2>超格精讲桶</h2><div class="sub">理论精讲→夸夸刷→超大杯→冲刺 · ${totalDone}/${totalAll}节</div></div></div>
+    <div class="card">
+      <h3>整体进度 <span class="tag green">${pct}%</span></h3>
+      <div class="progress" style="height:11px"><div class="success" style="width:${pct}%"></div></div>
+      <div class="grid grid-4 mt-12">
+        ${Object.entries(layers).map(([k,l])=>{
+          const lDone=l.modules.reduce((s,m)=>s+m.done,0);const lAll=l.modules.reduce((s,m)=>s+m.total,0);
+          return '<div style="text-align:center;padding:12px;background:var(--primary-bg);border-radius:8px"><div class="text-bold text-primary">'+l.name+'</div><div class="stat-num" style="font-size:22px">'+lDone+'<span style="font-size:12px;color:var(--text-muted)">/'+lAll+'</span></div><div class="text-xs text-muted">节</div></div>';
+        }).join('')}
+      </div>
+    </div>
+    ${Object.entries(layers).map(([lk,l])=>`
+      <div class="card">
+        <h3>${l.name} <span class="tag">${l.modules.reduce((s,m)=>s+m.done,0)}/${l.modules.reduce((s,m)=>s+m.total,0)}节</span></h3>
+        <div class="grid grid-3">
+          ${l.modules.map((m,mi)=>{
+            const mPct=Math.round(m.done/m.total*100);
+            return '<div style="padding:13px;background:var(--bg);border-radius:8px"><div class="flex between mb-8"><span class="text-bold">'+m.name+'</span><span class="tag '+(mPct>=80?'green':mPct<40?'yellow':'')+'">'+m.done+'/'+m.total+'</span></div><div class="progress mb-8"><div class="'+(mPct>=80?'success':mPct<40?'warn':'')+'" style="width:'+mPct+'%"></div></div>'+
+              m.lessons.map((lesson,li)=>'<div class="task-item '+(lesson.done?'done':'')+'" style="padding:4px 0"><div class="t-check" onclick="toggleLesson(\''+lk+'\','+mi+','+li+')">\u2713</div><span class="t-text">'+esc(lesson.name)+'</span></div>').join('')+
+            '</div>';
+          }).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+function toggleLesson(lk,mi,li){
+  const l=DB.chaoge[lk].modules[mi].lessons[li];
+  l.done=!l.done;
+  DB.chaoge[lk].modules[mi].done=DB.chaoge[lk].modules[mi].lessons.filter(x=>x.done).length;
+  save();renderChaoge();
+}
+
+/* ============ 渲染：刷题统计 ============ */
+function renderPractice(){
+  const p=DB.practice;
+  const todayRec=p.records.find(r=>r.date===today())||{fenbi:0,chaoge:0,kua:0,big:0};
+  const todayTotal=todayRec.fenbi+todayRec.chaoge+todayRec.kua+todayRec.big;
+
+  $('#page-practice').innerHTML=`
+    <div class="page-header"><div><h2>刷题实战统计</h2><div class="sub">粉笔题库 · 超格实战桶 · 夸夸刷 · 超大杯</div></div><button class="btn sm" onclick="addPractice()">+ 记录刷题</button></div>
+    <div class="grid grid-4">
+      <div class="stat-card"><span class="stat-num">${todayTotal}</span><span class="stat-label">今日刷题</span></div>
+      <div class="stat-card"><span class="stat-num text-info">${p.records.slice(-7).reduce((s,r)=>s+r.fenbi+r.chaoge+r.kua+r.big,0)}</span><span class="stat-label">近7天总量</span></div>
+      <div class="stat-card"><span class="stat-num text-primary">${DB.profile.dailyGoal}</span><span class="stat-label">每日目标</span></div>
+      <div class="stat-card"><span class="stat-num ${todayTotal>=DB.profile.dailyGoal?'text-success':'text-danger'}">${todayTotal>=DB.profile.dailyGoal?'达标':'未达标'}</span><span class="stat-label">今日状态</span></div>
+    </div>
+    <div class="card mt-16"><h3>近7天刷题量趋势</h3>${barChart(p.records.slice(-7))}</div>
+    <div class="card"><h3>各模块各题源正确率</h3><div style="overflow-x:auto"><table class="data">
+      <thead><tr><th>模块</th><th>粉笔题库</th><th>超格实战桶</th><th>夸夸刷</th><th>超大杯</th><th>总正确率</th></tr></thead>
+      <tbody>
+        ${Object.entries(p.modules).map(([k,v])=>{
+          const tc=v.fenbi.c+v.chaoge.c+v.kua.c+v.big.c;const tr=v.fenbi.r+v.chaoge.r+v.kua.r+v.big.r;
+          const trate=tc?Math.round(tr/tc*100):0;
+          const cell=(s)=>s.c?Math.round(s.r/s.c*100)+'%<br><span class="text-xs text-muted">'+s.c+'题</span>':'—';
+          return '<tr><td class="text-bold">'+k+'</td><td>'+cell(v.fenbi)+'</td><td>'+cell(v.chaoge)+'</td><td>'+cell(v.kua)+'</td><td>'+cell(v.big)+'</td><td><span class="tag '+(trate>=75?'green':trate<60?'red':'yellow')+'">'+trate+'%</span></td></tr>';
+        }).join('')}
+      </tbody>
+    </table></div></div>
+    <div class="card"><h3>知识点覆盖度检测 <span class="tag">与思维导图联动</span></h3><div class="coverage-grid">${renderCoveragePanel()}</div><div class="text-xs text-muted mt-12">覆盖度 = 已练习知识点的比例。灰色越多 = 越需要补。<a onclick="nav(\'mindmap\')">前往思维导图</a></div></div>
+  `;
+}
+
+function renderCoveragePanel(){
+  const mm=DB.mindmaps;const modules=['资料分析','判断推理','言语理解','数量关系','常识判断','申论'];
+  const practiceMods=DB.practice.modules;const mapToMm={'资料':'资料分析','判断':'判断推理','言语':'言语理解','数量':'数量关系','常识':'常识判断'};
+  return modules.map(mod=>{
+    const cats=mm[mod]||{};let totalKp=0,masteredKp=0;
+    for(const c of Object.values(cats)){if(c.points){totalKp+=c.points.length;masteredKp+=c.points.filter(p=>p.mastered).length}}
+    let practiced=0;
+    for(const[pm,pd]of Object.entries(practiceMods)){if(mapToMm[pm]===mod){practiced=pd.fenbi.c+pd.chaoge.c+pd.kua.c+pd.big.c;break}}
+    const covPct=totalKp?Math.round(masteredKp/totalKp*100):0;
+    const intensity=practiced>=200?'高':practiced>=80?'中':practiced>0?'低':'未练';
+    const iColor=intensity==='高'?'var(--success)':intensity==='中'?'var(--info)':intensity==='低'?'var(--warn)':'var(--danger)';
+    return '<div style="padding:14px;background:var(--bg);border-radius:8px"><div class="flex between mb-6"><span class="text-bold">'+mod+'</span><span class="tag '+(covPct>=70?'green':covPct>=40?'yellow':'red')+'">'+covPct+'% 掌握</span></div><div class="cov-bar"><div class="cov-done" style="width:'+covPct+'%"></div><div class="cov-undone" style="flex:1"></div></div><div class="flex between mt-8"><span class="text-xs text-muted">知识点：'+masteredKp+'/'+totalKp+'</span><span class="text-xs" style="color:'+iColor+'">刷题量：'+practiced+'题（'+intensity+'）</span></div></div>';
+  }).join('');
+}
+
+function barChart(history){
+  const max=Math.max(...history.map(h=>h.fenbi+h.chaoge+h.kua+h.big),1);
+  const w=42,gap=18;
+  return '<svg viewBox="0 0 '+(history.length*(w+gap)+30)+' 200" style="width:100%;max-width:600px;height:200px">'+
+    history.map((h,i)=>{
+      const x=15+i*(w+gap);const colors=[['粉笔',h.fenbi,'#8FA88D'],['超格',h.chaoge,'#3b82c4'],['夸夸',h.kua,'#39D6C2'],['大杯',h.big,'#8b5cf6']];
+      let yBase=170;
+      const bars=colors.map(([n,v,c])=>{const bh=v/max*150;yBase-=bh;return '<rect x="'+x+'" y="'+yBase+'" width="'+w+'" height="'+bh+'" fill="'+c+'" opacity=".85"/>'}).join('');
+      const total=h.fenbi+h.chaoge+h.kua+h.big;
+      return bars+'<text x="'+(x+w/2)+'" y="185" text-anchor="middle" font-size="10" fill="#7a7268">'+new Date(h.date).getDate()+'日</text><text x="'+(x+w/2)+'" y="'+(yBase-4)+'" text-anchor="middle" font-size="9" fill="#3a3530" font-weight="600">'+total+'</text>';
+    }).join('')+
+    '<rect x="15" y="0" width="9" height="9" fill="#8FA88D"/><text x="28" y="8" font-size="10">粉笔</text><rect x="65" y="0" width="9" height="9" fill="#3b82c4"/><text x="78" y="8" font-size="10">超格</text><rect x="115" y="0" width="9" height="9" fill="#39D6C2"/><text x="128" y="8" font-size="10">夸夸</text><rect x="165" y="0" width="9" height="9" fill="#8b5cf6"/><text x="178" y="8" font-size="10">大杯</text></svg>';
+}
+
+function addPractice(){
+  const modules=['言语','判断','数量','资料','常识'];
+  showModal('<h3>记录刷题</h3><div class="form-row"><div><label>题源</label><select class="input" id="p-src"><option value="fenbi">粉笔题库</option><option value="chaoge">超格实战桶</option><option value="kua">夸夸刷</option><option value="big">超大杯</option></select></div><div><label>模块</label><select class="input" id="p-mod">'+modules.map(m=>'<option>'+m+'</option>').join('')+'</select></div></div><div class="form-row"><div><label>题量</label><input type="number" class="input" id="p-count" value="20"></div><div><label>正确数</label><input type="number" class="input" id="p-correct" value="15"></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="savePractice()">保存</button></div>');
+}
+function savePractice(){
+  const src=$('#p-src').value,mod=$('#p-mod').value,cnt=+$('#p-count').value,cor=+$('#p-correct').value;
+  DB.practice.modules[mod][src].c+=cnt;DB.practice.modules[mod][src].r+=cor;
+  const t=today();let h=DB.practice.records.find(r=>r.date===t);
+  if(h)h[src]+=cnt;else DB.practice.records.push({date:t,fenbi:src==='fenbi'?cnt:0,chaoge:src==='chaoge'?cnt:0,kua:src==='kua'?cnt:0,big:src==='big'?cnt:0});
+  if(DB.practice.records.length>30)DB.practice.records=DB.practice.records.slice(-30);
+  save();closeModal();renderPractice();
+}
+
+/* ============ 渲染：错题台账 ============ */
+function renderMistakes(){
+  const ms=DB.mistakes;const causes={};ms.forEach(m=>{causes[m.cause]=(causes[m.cause]||0)+1});
+  const t=today();const dueMs=ms.filter(m=>{const days=daysBetween(m.date,t);return[1,3,7,15].some((r,i)=>days>=r&&!m.reviewed[i])});
+  $('#page-mistakes').innerHTML=`
+    <div class="page-header"><div><h2>难点易错台账</h2><div class="sub">共${ms.length}道 · ${dueMs.length}道待复习</div></div><button class="btn sm" onclick="addMistake()">+ 新增错题</button></div>
+    <div class="grid grid-4">
+      <div class="stat-card"><span class="stat-num">${ms.length}</span><span class="stat-label">总错题</span></div>
+      <div class="stat-card"><span class="stat-num text-danger">${dueMs.length}</span><span class="stat-label">待复习</span></div>
+      <div class="stat-card"><span class="stat-num text-success">${ms.filter(m=>m.reviewed.every(Boolean)).length}</span><span class="stat-label">已归档</span></div>
+      <div class="stat-card"><span class="stat-num text-info">${ms.filter(m=>{const d=daysBetween(m.date,t);return d<=7}).length}</span><span class="stat-label">本周新增</span></div>
+    </div>
+    <div class="grid grid-2 mt-16">
+      <div class="card"><h3>错因分析</h3>${pieChart(causes)}</div>
+      <div class="card"><h3>待复习错题 ${dueMs.length?'<span class="badge-due">'+dueMs.length+'</span>':''}</h3>
+        ${dueMs.length?dueMs.map(m=>'<div style="padding:10px;background:#fdf6e8;border-radius:7px;margin-bottom:8px"><div class="text-xs text-muted">'+fmtDate(m.date)+' · '+m.module+' · '+m.cause+'</div><div class="mt-6">'+esc(m.question)+'</div><button class="btn sm success mt-8" onclick="reviewMistake(\''+m.id+'\')">标记已复习</button></div>').join(''):'<div class="empty">无待复习错题</div>'}
+      </div>
+    </div>
+    <div class="card mt-16"><h3>全部错题</h3>
+      <div class="flex mb-12" style="gap:8px">
+        <input class="input" id="ms-search" placeholder="搜索题型或错因..." oninput="filterMistake(this.value)" style="max-width:240px">
+        <select class="input" id="ms-filter" onchange="filterMistake($(\'#ms-search\').value)" style="max-width:140px"><option value="">全部模块</option><option>言语</option><option>判断</option><option>数量</option><option>资料</option><option>常识</option></select>
+        <select class="input" id="ms-src" onchange="filterMistake($(\'#ms-search\').value)" style="max-width:140px"><option value="">全部来源</option><option>粉笔题库</option><option>超格实战桶</option><option>夸夸刷</option><option>超大杯</option></select>
+      </div>
+      <div id="ms-list">${renderMistakeList(ms)}</div>
+    </div>
+  `;
+}
+function renderMistakeList(ms){
+  if(!ms.length)return '<div class="empty">暂无错题</div>';
+  const t=today();
+  return ms.map(m=>{
+    const days=daysBetween(m.date,t);const nextReview=[1,3,7,15].find((r,i)=>!m.reviewed[i]&&days<r);
+    return '<div class="card" style="margin-bottom:10px;padding:13px"><div class="flex between mb-6"><div class="flex" style="gap:5px"><span class="tag blue">'+m.module+'</span><span class="tag '+(m.cause==='知识点不熟'?'red':m.cause==='粗心'?'yellow':'purple')+'">'+m.cause+'</span><span class="text-xs text-muted">'+fmtDate(m.date)+' · '+esc(m.source)+'</span></div><div>'+(nextReview?'<span class="tag yellow">'+nextReview+'天后复习</span>':'<span class="tag green">已掌握</span>')+'<a onclick="delMistake(\''+m.id+'\')" style="color:var(--danger);cursor:pointer;margin-left:6px">\u00d7</a></div></div><div style="margin:5px 0">'+esc(m.question)+'</div><div style="background:var(--primary-bg);padding:7px 10px;border-radius:6px;font-size:12px;color:var(--text-light)"><span class="text-bold text-primary">解析：</span>'+esc(m.analysis)+'</div></div>';
+  }).join('');
+}
+function filterMistake(q){
+  q=q.toLowerCase();const mod=$('#ms-filter')?$('#ms-filter').value:'';const src=$('#ms-src')?$('#ms-src').value:'';
+  const filtered=DB.mistakes.filter(m=>(!q||m.question.toLowerCase().includes(q)||m.analysis.toLowerCase().includes(q))&&(!mod||m.module===mod)&&(!src||m.source===src));
+  $('#ms-list').innerHTML=renderMistakeList(filtered);
+}
+function pieChart(data){
+  const entries=Object.entries(data);const total=entries.reduce((s,e)=>s+e[1],0);
+  const colors=['#d4544e','#39D6C2','#8b5cf6','#3b82c4','#8FA88D'];
+  let angle=-Math.PI/2;let slices='';const cx=70,cy=70,R=55;
+  entries.forEach((e,i)=>{
+    const pct=e[1]/total;const a2=angle+pct*2*Math.PI;
+    const x1=cx+Math.cos(angle)*R,y1=cy+Math.sin(angle)*R,x2=cx+Math.cos(a2)*R,y2=cy+Math.sin(a2)*R;
+    const large=pct>0.5?1:0;
+    slices+='<path d="M'+cx+','+cy+' L'+x1+','+y1+' A'+R+','+R+' 0 '+large+',1 '+x2+','+y2+' Z" fill="'+colors[i%5]+'"/>';
+    angle=a2;
+  });
+  return '<div class="flex" style="gap:14px;align-items:center"><svg viewBox="0 0 140 140" style="width:130px;height:130px">'+slices+'</svg><div>'+entries.map((e,i)=>'<div class="flex" style="gap:5px;margin-bottom:4px"><div style="width:11px;height:11px;background:'+colors[i%5]+';border-radius:2px"></div><span class="text-sm">'+e[0]+' ('+e[1]+')</span></div>').join('')+'</div></div>';
+}
+function addMistake(){
+  showModal('<h3>新增错题</h3><div class="form-row"><div><label>模块</label><select class="input" id="m-mod"><option>言语</option><option>判断</option><option>数量</option><option>资料</option><option>常识</option></select></div><div><label>错因</label><select class="input" id="m-cause"><option>知识点不熟</option><option>粗心</option><option>时间不够</option><option>审题错误</option></select></div><div><label>来源</label><select class="input" id="m-src"><option>粉笔题库</option><option>超格实战桶</option><option>夸夸刷</option><option>超大杯</option></select></div></div><div class="form-row"><div><label>题目</label><textarea id="m-q" placeholder="录入题目内容"></textarea></div></div><div class="form-row"><div><label>解析</label><textarea id="m-a" placeholder="正确解析"></textarea></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveMistake()">保存</button></div>');
+}
+function saveMistake(){
+  DB.mistakes.push({id:uid(),module:$('#m-mod').value,cause:$('#m-cause').value,source:$('#m-src').value,question:$('#m-q').value,analysis:$('#m-a').value,date:today(),reviewed:[false,false,false,false]});
+  save();closeModal();renderMistakes();
+}
+function reviewMistake(id){const m=DB.mistakes.find(x=>x.id===id);const days=daysBetween(m.date,today());[1,3,7,15].forEach((r,i)=>{if(days>=r)m.reviewed[i]=true});save();renderMistakes()}
+function delMistake(id){DB.mistakes=DB.mistakes.filter(m=>m.id!==id);save();renderMistakes()}
+
+/* ============ 渲染：词语积累库 ============ */
+let idiomBank='bank_hs';let idiomSearch='';
+
+function renderIdioms(){
+  const banks=DB.idioms.banks;const bank=banks.find(b=>b.id===idiomBank)||banks[0];const items=DB.idioms.items;
+  let totalIdioms=0;banks.forEach(b=>{b.groups.forEach(g=>totalIdioms+=g.idioms.length)});totalIdioms+=DB.idioms.custom.length;
+  const bankTotal=bank.groups.reduce((s,g)=>s+g.idioms.length,0)+(idiomBank==='bank_hs'?DB.idioms.custom.length:0);
+  let groups=bank.groups.map(g=>({...g,idioms:g.idioms.filter(id=>{const item=items[id];if(!item||!idiomSearch)return true;return item.w.includes(idiomSearch)||item.m.includes(idiomSearch)||item.e.includes(idiomSearch)})})).filter(g=>g.idioms.length>0);
+  if(idiomBank==='bank_hs'&&DB.idioms.custom.length>0){const filtered=idiomSearch?DB.idioms.custom.filter(c=>c.word.includes(idiomSearch)||c.meaning.includes(idiomSearch)):DB.idioms.custom;if(filtered.length>0)groups.unshift({id:'custom',name:'\u2b50 自定义添加',idioms:filtered.map(c=>c.id)})}
+
+  $('#page-idioms').innerHTML=`
+    <div class="page-header"><div><h2>词语积累库</h2><div class="sub">花生800词 · 雨菲800词 · 超格400词 · 分类记忆</div></div><div class="flex" style="gap:6px"><button class="btn ghost sm" onclick="idiomReview()">\ud83d\udd04 复习模式</button><button class="btn sm" onclick="addIdiom()">+ 添加成语</button></div></div>
+    <div class="grid grid-4">
+      <div class="stat-card"><span class="stat-num">${totalIdioms}</span><span class="stat-label">总成语数</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:var(--accent)">${bankTotal}</span><span class="stat-label">当前词库</span></div>
+      <div class="stat-card"><span class="stat-num text-info">${bank.groups.length}</span><span class="stat-label">分组数</span></div>
+      <div class="stat-card"><span class="stat-num text-success">${DB.idioms.custom.length}</span><span class="stat-label">自定义</span></div>
+    </div>
+    <div class="card mt-16"><div class="flex" style="gap:8px;flex-wrap:wrap">
+      ${banks.map(b=>'<button class="btn '+(idiomBank===b.id?'':'ghost')+' sm" onclick="idiomBank=\''+b.id+'\';renderIdioms()" style="border-left:3px solid '+b.color+'">'+b.icon+' '+b.name+'（'+b.count+'词）</button>').join('')}
+    </div></div>
+    <div class="card"><input class="input" id="id-search" placeholder="搜索成语或释义..." value="${esc(idiomSearch)}" oninput="idiomSearch=this.value;renderIdioms()"></div>
+    <div id="idiom-list">
+      ${groups.map(g=>'<div class="card"><h3>'+g.name+' <span class="tag">'+g.idioms.length+'词</span></h3><div class="grid grid-2">'+g.idioms.map(id=>{const item=g.id==='custom'?DB.idioms.custom.find(c=>c.id===id):items[id];if(!item)return'';return renderIdiomCard(item,g.id==='custom')}).join('')+'</div></div>').join('')}
+      ${groups.length===0?'<div class="empty"><span class="ico">\ud83d\udd0d</span>没有匹配的成语</div>':''}
+    </div>
+  `;
+}
+
+function renderIdiomCard(i,isCustom=false){
+  const toneColor={'\u8912\u4e49':'var(--success)','\u8d2c\u4e49':'var(--danger)','\u4e2d\u6027':'var(--info)'};
+  const sourceLabel={bank_hs:'\ud83e\udd5c\u82b1\u751f',bank_yf:'\ud83c\udf27\ufe0f\u96e8\u83f2',bank_cg:'\ud83d\udcd0\u8d85\u683c'};
+  return '<div class="idiom-card"><div class="i-head"><span class="i-word">'+esc(i.w||i.word)+'</span><div class="flex" style="gap:4px"><span class="tag" style="background:'+(toneColor[i.tone||'\u4e2d\u6027']||'var(--info)')+'15;color:'+(toneColor[i.tone||'\u4e2d\u6027']||'var(--info)')+'">'+(i.tone||'\u4e2d\u6027')+'</span>'+(isCustom?'<span class="tag" style="background:#ede4ff;color:var(--purple)">\u81ea\u5b9a\u4e49</span>':'<span class="tag" style="font-size:10px;color:var(--text-muted)">'+(sourceLabel[i.source]||'')+'</span>')+'<a onclick="editIdiom(\''+i.id+'\')" style="font-size:13px">\u270e</a><a onclick="delIdiom(\''+i.id+'\')" style="color:var(--danger);font-size:13px">\u00d7</a></div></div><div class="text-sm" style="color:var(--text-light)">'+esc(i.m||i.meaning)+'</div><div class="i-example">'+esc(i.e||i.example)+'</div></div>';
+}
+
+function addIdiom(){showIdiomModal({})}
+function editIdiom(id){let item=DB.idioms.custom.find(c=>c.id===id);if(!item)item=DB.idioms.items[id];showIdiomModal(item||{})}
+function showIdiomModal(i){
+  showModal('<h3>'+(i.id?'编辑成语':'添加成语')+'</h3><div class="form-row"><div><label>成语</label><div class="flex" style="gap:6px"><input class="input" id="i-word" value="'+esc(i.w||i.word||'')+'" placeholder="输入成语，如：未雨绸缪" style="flex:1"><button class="btn accent sm" onclick="autoSearchIdiom()" id="i-search-btn">\ud83d\udd0d 自动搜索</button></div></div><div><label>感情色彩</label><select class="input" id="i-tone"><option '+(i.tone==='\u8912\u4e49'?'selected':'')+'>\u8912\u4e49</option><option '+(i.tone==='\u8d2c\u4e49'?'selected':'')+'>\u8d2c\u4e49</option><option '+(i.tone==='\u4e2d\u6027'?'selected':'')+'>\u4e2d\u6027</option></select></div></div><div style="background:#fff9e6;padding:8px 12px;border-radius:6px;font-size:11px;color:#92400e;margin-bottom:10px">\ud83d\udca1 点击「\ud83d\udd0d 自动搜索」将从<b>人民日报/求是网</b>等官媒自动查找该成语的释义和真实例句。</div><div class="form-row"><div><label>\ud83d\udcd6 释义</label><textarea id="i-meaning" rows="2">'+esc(i.m||i.meaning||'')+'</textarea></div></div><div class="form-row"><div><label>\ud83d\udcf0 例句（官网/人民日报等官方来源）</label><textarea id="i-example" rows="2" placeholder="将自动从官方来源搜索...">'+esc(i.e||i.example||'')+'</textarea></div></div><div id="i-search-status" style="font-size:11px;color:var(--text-muted);margin:6px 0"></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveIdiom(\''+(i.id||'')+'\')">\ud83d\udcbe 保存</button></div>');
+}
+
+async function autoSearchIdiom(){
+  const word=$('#i-word').value.trim();if(!word){alert('请先输入成语');return}
+  const btn=$('#i-search-btn');const status=$('#i-search-status');
+  btn.textContent='\u23f3 搜索中...';btn.disabled=true;
+  status.textContent='正在人民日报/求是网搜索「'+word+'」的释义和例句...';
+  try{
+    let meaning='',example='';
+    try{const zdicUrl='https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.zdic.net/hans/'+encodeURIComponent(word));const resp=await fetch(zdicUrl);const html=await resp.text();const mMatch=html.match(/<p[^>]*>\u25ce[^<]*<[^>]*>([^<]+)</);if(mMatch)meaning=mMatch[1].trim();const eMatch=html.match(/\u793a\u4f8b[^<]*<[^>]*>([^<]+)</);if(eMatch)example=eMatch[1].trim()}catch(e){}
+    if(!example){try{const rmrbUrl='https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.baidu.com/s?wd='+encodeURIComponent(word+' site:people.com.cn'));const resp2=await fetch(rmrbUrl);const html2=await resp2.text();const div=document.createElement('div');div.innerHTML=html2;const snippets=div.querySelectorAll('.c-abstract,.c-span-last');for(const s of snippets){const txt=s.innerText.trim();if(txt.includes(word)&&txt.length>20&&txt.length<200){example=txt;break}}}catch(e){}}
+    if(!meaning){try{const bkUrl='https://api.allorigins.win/raw?url='+encodeURIComponent('https://baike.baidu.com/item/'+encodeURIComponent(word));const resp3=await fetch(bkUrl);const html3=await resp3.text();const mMatch2=html3.match(/<meta name="description" content="([^"]+)"/);if(mMatch2){const desc=mMatch2[1].trim();const idx=desc.indexOf('\u3002');meaning=idx>0?desc.substring(0,idx+1):desc.substring(0,100)}}catch(e){}}
+    if(meaning){$('#i-meaning').value=meaning;status.textContent='\u2705 已找到释义';status.style.color='var(--success)'}
+    if(example){$('#i-example').value=example;status.textContent=(meaning?'\u2705 已找到释义和例句':'\u2705 已找到例句');status.style.color='var(--success)'}
+    if(!meaning&&!example){status.textContent='\u26a0\ufe0f 未找到结果，请手动填入';status.style.color='var(--danger)'}
+  }catch(e){status.textContent='\u26a0\ufe0f 搜索失败：'+e.message;status.style.color='var(--danger)'}
+  btn.textContent='\ud83d\udd0d 重新搜索';btn.disabled=false;
+}
+
+function saveIdiom(id){
+  const data={word:$('#i-word').value.trim(),tone:$('#i-tone').value,meaning:$('#i-meaning').value.trim(),example:$('#i-example').value.trim()};
+  if(id){let item=DB.idioms.custom.find(c=>c.id===id);if(item){Object.assign(item,data)}else if(DB.idioms.items[id]){Object.assign(DB.idioms.items[id],{w:data.word,m:data.meaning,t:data.tone,e:data.example})}}
+  else{const newId=uid();DB.idioms.custom.push({id:newId,...data})}
+  save();closeModal();renderIdioms();
+}
+function delIdiom(id){DB.idioms.custom=DB.idioms.custom.filter(c=>c.id!==id);if(DB.idioms.items[id])DB.idioms.items[id]._hidden=true;save();renderIdioms()}
+
+function idiomReview(){
+  const all=[];DB.idioms.banks.forEach(b=>{b.groups.forEach(g=>{g.idioms.forEach(id=>{const item=DB.idioms.items[id];if(item&&!item._hidden)all.push({...item,id})})})});DB.idioms.custom.forEach(c=>all.push({w:c.word,m:c.meaning,t:c.tone,e:c.example,id:c.id}));
+  if(all.length<2){alert('至少需要2个成语');return}
+  let idx=0;
+  const showCard=()=>{
+    const i=all[idx];
+    showModal('<h3>成语复习 <span class="tag">'+(idx+1)+'/'+all.length+'</span></h3><div style="text-align:center;padding:20px;cursor:pointer" onclick="flipReview()"><div id="front"><div style="font-size:28px;font-weight:700;color:var(--primary-dark);margin-bottom:10px">'+esc(i.w||i.word)+'</div><div class="text-muted text-sm">点击查看释义</div></div><div id="back" style="display:none"><div style="font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:8px">'+esc(i.w||i.word)+'</div><div class="text-sm" style="margin-bottom:8px">'+esc(i.m||i.meaning)+'</div><div class="i-example" style="text-align:left">'+esc(i.e||i.example)+'</div></div></div><div class="flex" style="justify-content:space-between;margin-top:16px"><button class="btn ghost sm" onclick="prevIdiom()">上一个</button><button class="btn ghost sm" onclick="closeModal()">\u2715 关闭</button><button class="btn sm" onclick="nextIdiom()">下一个</button></div>');
+  };
+  showCard();
+  window.flipReview=()=>{$('#front').style.display=$('#front').style.display==='none'?'block':'none';$('#back').style.display=$('#back').style.display==='none'?'block':'none'};
+  window.prevIdiom=()=>{idx=(idx-1+all.length)%all.length;showCard()};
+  window.nextIdiom=()=>{idx=(idx+1)%all.length;showCard()};
+}
+
+/* ============ 渲染：精读库 ============ */
+let jdCurrentTopic=null;let jdCurrentArticle=null;
+
+function renderQiushi(){
+  const jd=DB.jingdu;const topics=jd.topics.sort((a,b)=>a.priority-b.priority);
+  const totalArticles=topics.reduce((s,t)=>s+t.articles.length,0);
+  const totalWords=topics.reduce((s,t)=>s+t.articles.reduce((ss,a)=>ss+(a.words?1:0),0),0);
+  if(jdCurrentArticle){renderArticleDetail();return}
+  const priorityLabels={1:'\u26a1 高频',2:'\ud83d\udd25 中频',3:'\ud83d\udccc 常规',4:'\ud83d\udccb 储备'};
+  const priorityColors={1:'var(--danger)',2:'var(--accent)',3:'var(--info)',4:'var(--text-muted)'};
+
+  $('#page-qiushi').innerHTML=`
+    <div class="page-header"><div><h2>申论精读库</h2><div class="sub">16大话题模块 · 全文精读 + 结构分析 + 模板金句 + 面试素材</div></div><div class="flex" style="gap:8px"><button class="btn sm ghost" onclick="jdCurrentTopic=null;jdCurrentArticle=null;renderQiushi()">\ud83d\udccb 话题总览</button></div></div>
+    <div class="grid grid-4">
+      <div class="stat-card"><span class="stat-num">${topics.length}</span><span class="stat-label">话题模块</span></div>
+      <div class="stat-card"><span class="stat-num text-primary">${totalArticles}</span><span class="stat-label">精读文章</span></div>
+      <div class="stat-card"><span class="stat-num text-info">${totalWords}</span><span class="stat-label">规范词积累</span></div>
+      <div class="stat-card"><span class="stat-num text-success">${topics.filter(t=>t.articles.length>0).length}</span><span class="stat-label">已覆盖话题</span></div>
+    </div>
+    <div class="card mt-16"><h3>话题覆盖进度</h3><div class="cov-bar" style="height:28px;border-radius:14px;margin:10px 0">
+      ${(()=>{let acc=0;return topics.map(t=>{const pct=100/topics.length;const filled=t.articles.length>0;const s='<div style="width:'+pct+'%;background:'+(filled?'var(--success)':'var(--border-light)')+';display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;border-right:1px solid #fff" title="'+t.name+':'+t.articles.length+'篇">'+(filled?'\u2713':'')+'</div>';acc+=pct;return s}).join('')})()}
+    </div><div style="font-size:11px;color:var(--text-muted);text-align:center">${topics.filter(t=>t.articles.length>0).length}/${topics.length} 话题已收录 · 每日按话题轮转推送</div></div>
+    <div class="jd-topic-grid mt-16">
+      ${topics.map(t=>'<div class="jd-topic-card'+(jdCurrentTopic===t.id?' active':'')+'" onclick="openTopic(\''+t.id+'\')">'+(t.articles.length>0?'<span class="jd-t-badge">'+t.articles.length+'篇</span>':'')+'<div class="jd-t-icon">'+t.icon+'</div><div class="jd-t-name">'+t.name+'</div><div class="jd-t-count" style="color:'+priorityColors[t.priority]+'">'+priorityLabels[t.priority]+' · '+(t.articles.length>0?'已收录':'待收录')+'</div></div>').join('')}
+    </div>
+  `;
+}
+
+function openTopic(topicId){
+  jdCurrentTopic=topicId;jdCurrentArticle=null;
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);if(!t)return;
+  const articles=t.articles.sort((a,b)=>b.date.localeCompare(a.date));
+  $('#page-qiushi').innerHTML=`
+    <div class="page-header"><div><h2>${t.icon} ${t.name}</h2><div class="sub">${articles.length}篇精读文章 · 优先级${t.priority}</div></div><div class="flex" style="gap:8px"><button class="btn sm ghost" onclick="jdCurrentTopic=null;jdCurrentArticle=null;renderQiushi()">\u2190 话题总览</button><button class="btn sm accent" onclick="importJingduFromUrl(\'${topicId}\')">\ud83d\udd17 链接导入</button><button class="btn sm" onclick="addJingduArticle(\'${topicId}\')">+ 手动添加</button></div></div>
+    ${articles.length===0?'<div class="empty"><span class="ico">\ud83d\udced</span>该话题暂无文章。<br>点击"+ 添加文章"手动添加。</div>':articles.map(a=>'<div class="jd-article-card" style="cursor:pointer" onclick="openArticle(\''+topicId+'\',\''+a.id+'\')"><div class="jd-a-title">'+esc(a.title)+'</div><div class="jd-a-meta">\ud83d\udcf0 '+esc(a.source)+(a.author?' · '+esc(a.author):'')+' · '+fmtDate(a.date)+'</div>'+(a.words?'<div style="background:var(--primary-bg);padding:7px 10px;border-radius:5px;font-size:12px;margin-bottom:6px"><b>\ud83c\udff7\ufe0f 规范词：</b>'+esc(a.words)+'</div>':'')+'<div class="jd-tags">'+(a.tags||[]).map(tg=>'<span class="jd-tag">'+tg+'</span>').join('')+'</div><div class="flex" style="justify-content:flex-end;gap:6px;margin-top:8px"><button class="btn sm ghost" onclick="event.stopPropagation();editJingduArticle(\''+topicId+'\',\''+a.id+'\')">\u270e 编辑</button><button class="btn sm danger" onclick="event.stopPropagation();delJingduArticle(\''+topicId+'\',\''+a.id+'\')">\u00d7 删除</button></div></div>').join('')}
+  `;
+}
+
+function openArticle(topicId,articleId){jdCurrentTopic=topicId;jdCurrentArticle=articleId;renderArticleDetail()}
+
+function renderArticleDetail(){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===jdCurrentTopic);if(!t)return;
+  const a=t.articles.find(x=>x.id===jdCurrentArticle);if(!a)return;
+  $('#page-qiushi').innerHTML=`
+    <div class="jd-back" onclick="jdCurrentArticle=null;openTopic(\'${jdCurrentTopic}\')">\u2190 返回话题</div>
+    <div class="page-header"><div><h2>${esc(a.title)}</h2><div class="sub">\ud83d\udcf0 ${esc(a.source)}${a.author?' · '+esc(a.author):''} · ${fmtDate(a.date)}</div></div>${a.url?'<a href="'+esc(a.url)+'" target="_blank" class="btn sm ghost">\ud83d\udd17 原文链接</a>':''}</div>
+    ${a.words?'<div class="card"><h3>\ud83c\udff7\ufe0f 规范词积累</h3><p style="font-size:13px;color:var(--primary-dark)">'+esc(a.words)+'</p></div>':''}
+    ${a.tags&&a.tags.length>0?'<div class="jd-tags mb-12">'+a.tags.map(tg=>'<span class="jd-tag">'+tg+'</span>').join('')+'</div>':''}
+    ${a.fullText?'<div class="card"><h3>\ud83d\udcc4 全文精读</h3><div class="jd-full-text">'+esc(a.fullText).replace(/\\n/g,'<br>')+'</div></div>':''}
+    ${a.structure?'<div class="card"><h3>\ud83d\udcca 结构分析（论述逻辑）</h3><div class="mm-tree mm-blue">'+parseToMindmap(a.structure,'blue')+'</div></div>':''}
+    ${a.template?'<div class="card"><h3>\ud83d\udcdd 可套用模板</h3><div class="mm-tree mm-gold">'+parseToMindmap(a.template,'gold')+'</div></div>':''}
+    ${a.sentences?'<div class="card"><h3>\ud83d\udca1 金句例句</h3><div class="mm-tree mm-green">'+parseToMindmap(a.sentences,'green')+'</div></div>':''}
+    ${a.interview?'<div class="card"><h3>\ud83c\udfa4 面试亮点</h3><div class="mm-tree mm-purple">'+parseToMindmap(a.interview,'purple')+'</div></div>':''}
+    ${a.tips?'<div class="card"><h3>\ud83d\udca1 使用提示</h3><div class="mm-tree mm-red">'+parseToMindmap(a.tips,'red')+'</div></div>':''}
+    <div class="flex mt-16" style="justify-content:flex-end;gap:8px"><button class="btn ghost" onclick="editJingduArticle(\'${jdCurrentTopic}\',\'${jdCurrentArticle}\')">\u270e 编辑文章</button><button class="btn danger" onclick="delJingduArticle(\'${jdCurrentTopic}\',\'${jdCurrentArticle}\')">\u00d7 删除文章</button></div>
+  `;
+}
+
+function importJingduFromUrl(topicId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);
+  showModal('<h3>\ud83d\udd17 链接导入分析 · '+t.name+'</h3><div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">粘贴求是网/人民日报/学习强国等官方文章链接，自动抓取全文并生成分析框架。</div><div class="form-row"><div><label>文章链接</label><input class="input" id="ji-url" placeholder="https://..." autofocus></div></div><div class="form-row"><div><label>来源</label><input class="input" id="ji-source" value="人民日报"></div><div><label>作者（选填）</label><input class="input" id="ji-author"></div></div><div class="form-row"><div><label>日期</label><input type="date" class="input" id="ji-date" value="'+today()+'"></div><div><label>话题标签（逗号分隔）</label><input class="input" id="ji-tags" value="'+t.name+'"></div></div><div class="form-row"><div><label>\ud83d\udcc4 全文内容</label><textarea id="ji-fullText" rows="6" placeholder="点击下方按钮自动抓取，或手动粘贴文章全文..."></textarea></div></div><div class="form-row"><div><label>\ud83d\udcca 结构分析</label><textarea id="ji-structure" rows="3"></textarea></div></div><div class="form-row"><div><label>\ud83d\udcdd 可套用模板</label><textarea id="ji-template" rows="3"></textarea></div></div><div class="form-row"><div><label>\ud83d\udca1 金句例句</label><textarea id="ji-sentences" rows="3"></textarea></div></div><div class="form-row"><div><label>\ud83c\udfa4 面试亮点</label><textarea id="ji-interview" rows="3"></textarea></div></div><div class="form-row"><div><label>\ud83d\udca1 使用提示</label><textarea id="ji-tips" rows="2"></textarea></div></div><div class="form-row"><div><label>\ud83c\udff7\ufe0f 规范词</label><input class="input" id="ji-words" placeholder="如：新质生产力、创新驱动"></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn accent" onclick="fetchArticleContent(\''+topicId+'\')" id="ji-fetch-btn">\ud83c\udf10 抓取全文</button><button class="btn" onclick="saveImportArticle(\''+topicId+'\')">\ud83d\udcbe 保存文章</button></div>');
+}
+
+async function fetchArticleContent(topicId){
+  const url=$('#ji-url').value.trim();if(!url){alert('请先粘贴文章链接');return}
+  const btn=$('#ji-fetch-btn');btn.textContent='\u23f3 抓取中...';btn.disabled=true;
+  try{
+    const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+    const resp=await fetch(proxyUrl);const html=await resp.text();
+    const div=document.createElement('div');div.innerHTML=html;
+    div.querySelectorAll('script,style,nav,footer,.comment,.ad').forEach(el=>el.remove());
+    const article=div.querySelector('article,.article,.content,.post-content,.entry-content,#content,.text-content,.main-content');
+    const text=(article||div).innerText.replace(/\\n{3,}/g,'\\n\\n').trim().substring(0,8000);
+    $('#ji-fullText').value=text||'\u26a0\ufe0f 无法自动提取全文，请手动粘贴。';
+    if(text)btn.textContent='\u2705 已抓取';else btn.textContent='\u26a0\ufe0f 请手动粘贴';
+  }catch(e){$('#ji-fullText').value='\u26a0\ufe0f 抓取失败：'+e.message+'。请手动粘贴全文。';btn.textContent='\u274c 失败，请手动粘贴'}
+  btn.disabled=false;
+}
+
+function saveImportArticle(topicId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);if(!t)return;
+  const title=$('#ji-url').value.trim();
+  const data={title:title||'未命名文章',source:$('#ji-source').value.trim()||'人民日报',author:$('#ji-author').value.trim(),date:$('#ji-date').value||today(),url:$('#ji-url').value.trim(),words:$('#ji-words').value.trim(),tags:$('#ji-tags').value.split(/[,，、]/).map(s=>s.trim()).filter(Boolean),fullText:$('#ji-fullText').value.trim(),structure:$('#ji-structure').value.trim(),template:$('#ji-template').value.trim(),sentences:$('#ji-sentences').value.trim(),interview:$('#ji-interview').value.trim(),tips:$('#ji-tips').value.trim()};
+  t.articles.push({id:uid(),...data});
+  save();closeModal();openTopic(topicId);
+}
+
+function addJingduArticle(topicId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);
+  showModal('<h3>添加精读文章 · '+t.name+'</h3><div class="form-row"><div><label>文章标题</label><input class="input" id="ja-title"></div></div><div class="form-row"><div><label>来源</label><input class="input" id="ja-source" value="人民日报"></div><div><label>作者</label><input class="input" id="ja-author"></div></div><div class="form-row"><div><label>日期</label><input type="date" class="input" id="ja-date" value="'+today()+'"></div><div><label>原文链接</label><input class="input" id="ja-url"></div></div><div class="form-row"><div><label>规范词（逗号分隔）</label><input class="input" id="ja-words"></div></div><div class="form-row"><div><label>主题标签（逗号分隔）</label><input class="input" id="ja-tags"></div></div><div class="form-row"><div><label>全文内容</label><textarea id="ja-fullText" rows="5"></textarea></div></div><div class="form-row"><div><label>结构分析</label><textarea id="ja-structure" rows="3"></textarea></div></div><div class="form-row"><div><label>可套用模板</label><textarea id="ja-template" rows="3"></textarea></div></div><div class="form-row"><div><label>金句例句</label><textarea id="ja-sentences" rows="3"></textarea></div></div><div class="form-row"><div><label>面试亮点</label><textarea id="ja-interview" rows="3"></textarea></div></div><div class="form-row"><div><label>使用提示</label><textarea id="ja-tips" rows="2"></textarea></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveJingduArticle(\''+topicId+'\')">保存</button></div>');
+}
+
+function editJingduArticle(topicId,articleId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);const a=t.articles.find(x=>x.id===articleId);if(!a)return;
+  showModal('<h3>编辑精读文章 · '+t.name+'</h3><div class="form-row"><div><label>文章标题</label><input class="input" id="ja-title" value="'+esc(a.title)+'"></div></div><div class="form-row"><div><label>来源</label><input class="input" id="ja-source" value="'+esc(a.source||'')+'"></div><div><label>作者</label><input class="input" id="ja-author" value="'+esc(a.author||'')+'"></div></div><div class="form-row"><div><label>日期</label><input type="date" class="input" id="ja-date" value="'+(a.date||today())+'"></div><div><label>原文链接</label><input class="input" id="ja-url" value="'+esc(a.url||'')+'"></div></div><div class="form-row"><div><label>规范词</label><input class="input" id="ja-words" value="'+esc(a.words||'')+'"></div></div><div class="form-row"><div><label>主题标签</label><input class="input" id="ja-tags" value="'+esc((a.tags||[]).join('\u3001'))+'"></div></div><div class="form-row"><div><label>全文内容</label><textarea id="ja-fullText" rows="5">'+esc(a.fullText||'')+'</textarea></div></div><div class="form-row"><div><label>结构分析</label><textarea id="ja-structure" rows="3">'+esc(a.structure||'')+'</textarea></div></div><div class="form-row"><div><label>可套用模板</label><textarea id="ja-template" rows="3">'+esc(a.template||'')+'</textarea></div></div><div class="form-row"><div><label>金句例句</label><textarea id="ja-sentences" rows="3">'+esc(a.sentences||'')+'</textarea></div></div><div class="form-row"><div><label>面试亮点</label><textarea id="ja-interview" rows="3">'+esc(a.interview||'')+'</textarea></div></div><div class="form-row"><div><label>使用提示</label><textarea id="ja-tips" rows="2">'+esc(a.tips||'')+'</textarea></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveJingduArticle(\''+topicId+'\',\''+articleId+'\')">保存</button></div>');
+}
+
+function saveJingduArticle(topicId,editId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);if(!t)return;
+  const data={title:$('#ja-title').value.trim(),source:$('#ja-source').value.trim(),author:$('#ja-author').value.trim(),date:$('#ja-date').value,url:$('#ja-url').value.trim(),words:$('#ja-words').value.trim(),tags:$('#ja-tags').value.split(/[,，、]/).map(s=>s.trim()).filter(Boolean),fullText:$('#ja-fullText').value.trim(),structure:$('#ja-structure').value.trim(),template:$('#ja-template').value.trim(),sentences:$('#ja-sentences').value.trim(),interview:$('#ja-interview').value.trim(),tips:$('#ja-tips').value.trim()};
+  if(editId){const a=t.articles.find(x=>x.id===editId);if(a)Object.assign(a,data)}
+  else{t.articles.push({id:uid(),...data})}
+  save();closeModal();jdCurrentArticle=editId||null;
+  if(jdCurrentArticle)renderArticleDetail();else openTopic(topicId);
+}
+
+function delJingduArticle(topicId,articleId){
+  const jd=DB.jingdu;const t=jd.topics.find(x=>x.id===topicId);if(!t)return;
+  t.articles=t.articles.filter(a=>a.id!==articleId);jdCurrentArticle=null;
+  save();openTopic(topicId);
+}
+
+/* ============ 文本→思维导图解析 ============ */
+function parseToMindmap(text,color){
+  if(!text)return'';
+  const lines=text.split('\n').filter(l=>l.trim());
+  let html='<div class="mm-branch">';let inSub=false;
+  lines.forEach((line,i)=>{
+    const t=line.trim();
+    const isRoot=/^【.+】/.test(t)||/^[①②③④⑤⑥⑦⑧⑨⑩]/.test(t)||/^\d+[\.\、）)]/.test(t);
+    const isL2=/^[①②③④⑤⑥⑦⑧⑨⑩]/.test(t)||/^[a-zA-Z]\./.test(t)||/^\d+[\.\、）)]/.test(t);
+    const isInterviewL2=/^\d+\.\s/.test(t);
+    if(isRoot&&!isInterviewL2){
+      if(inSub){html+='</div>';inSub=false}
+      html+='</div><div class="mm-branch"><div class="mm-node mm-root">'+esc(t)+'</div>';
+    }else if(isL2||isInterviewL2){
+      if(!inSub){inSub=true}
+      html+='<div class="mm-node mm-l2">'+esc(t)+'</div>';
+    }else{html+='<div class="mm-node mm-l3">'+esc(t)+'</div>'}
+  });
+  html+='</div>';
+  return html;
+}
+
+/* ============ 渲染：知识点思维导图 ============ */
+let mmCurrentTab='资料分析';
+function renderMindmap(){
+  const mm=DB.mindmaps;let total=0,done=0;
+  for(const[mod,cats]of Object.entries(mm)){for(const cat of Object.values(cats)){total+=cat.points.length;done+=cat.points.filter(p=>p.mastered).length}}
+  $('#page-mindmap').innerHTML=`
+    <div class="page-header"><div><h2>知识点思维导图</h2><div class="sub">${total}个知识点 · 已掌握${done}个 · ${Math.round(done/total*100)}%</div></div></div>
+    <div class="card"><div class="flex between mb-12"><span class="text-sm text-muted">整体掌握率</span><span class="tag green">${Math.round(done/total*100)}%</span></div><div class="progress" style="height:11px"><div class="success" style="width:${done/total*100}%"></div></div></div>
+    <div class="card">
+      <div class="mindmap-tabs">
+        ${Object.keys(mm).map(mod=>{let mt=0,md=0;for(const c of Object.values(mm[mod])){mt+=c.points.length;md+=c.points.filter(p=>p.mastered).length}const pct=mt?Math.round(md/mt*100):0;return '<div class="mindmap-tab '+(mod===mmCurrentTab?'active':'')+'" onclick="switchMmTab(\''+mod+'\')">'+mod+' '+pct+'%</div>'}).join('')}
+      </div>
+      <div id="mm-content">${renderMmTree(mmCurrentTab)}</div>
+    </div>
+  `;
+}
+function renderMmTree(mod){
+  const cats=DB.mindmaps[mod];
+  return '<div class="tree">'+Object.entries(cats).map(([cat,c])=>'<div class="tree-node '+(c._expanded?'':'collapsed')+'"><span class="tree-toggle" onclick="toggleMmCat(\''+mod+'\',\''+cat+'\')"><span class="arrow">\u25bc</span><span class="kp-name text-bold">'+cat+'</span><span class="tag gray" style="margin-left:4px">'+c.points.filter(p=>p.mastered).length+'/'+c.points.length+'</span></span><div class="tree-children">'+c.points.map((p,pi)=>'<div class="tree-node"><span class="kp-name">'+esc(p.name)+'</span><span class="mastered '+(p.mastered?'on':'')+'" onclick="toggleKp(\''+mod+'\',\''+cat+'\','+pi+')">\u2713</span></div>').join('')+'</div></div>').join('')+'</div>';
+}
+function switchMmTab(mod){mmCurrentTab=mod;renderMindmap()}
+function toggleMmCat(mod,cat){DB.mindmaps[mod][cat]._expanded=!DB.mindmaps[mod][cat]._expanded;save();$('#mm-content').innerHTML=renderMmTree(mod)}
+function toggleKp(mod,cat,pi){DB.mindmaps[mod][cat].points[pi].mastered=!DB.mindmaps[mod][cat].points[pi].mastered;save();renderMindmap()}
+
+/* ============ 渲染：考情日历 ============ */
+function renderCalendar(){
+  const now=new Date();const y=now.getFullYear(),m=now.getMonth();
+  const first=new Date(y,m,1);const startD=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const events={};DB.calendar.forEach(e=>events[e.date]=e);
+  const monthStr=y+'年'+(m+1)+'月';
+  let cells='';['日','一','二','三','四','五','六'].forEach(d=>cells+='<div class="cal-head">'+d+'</div>');
+  for(let i=0;i<startD;i++)cells+='<div class="cal-cell"></div>';
+  for(let d=1;d<=daysInMonth;d++){const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const ev=events[ds];const isToday=ds===today();cells+='<div class="cal-cell '+(ev?'has-event':'')+' '+(isToday?'today':'')+'"><div class="d-num">'+d+'</div>'+(ev?'<div class="d-event">'+esc(ev.event)+'</div>':'')+'</div>'}
+  const upcoming=DB.calendar.filter(e=>e.date>=today()).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#page-calendar').innerHTML=`
+    <div class="page-header"><div><h2>考情日历</h2><div class="sub">${monthStr} · 国考关键时间节点</div></div><button class="btn sm" onclick="addEvent()">+ 添加节点</button></div>
+    <div class="grid grid-2">
+      <div class="card"><h3>${monthStr}</h3><div class="cal-grid">${cells}</div></div>
+      <div class="card"><h3>即将到来</h3>
+        ${upcoming.length?upcoming.map(e=>{const days=daysBetween(today(),e.date);return '<div class="flex between" style="padding:9px 0;border-bottom:1px solid var(--border-light)"><div><div class="text-bold">'+esc(e.event)+'</div><div class="text-xs text-muted">'+fmtFull(e.date)+'</div></div><div>'+(days>0?'<span class="tag '+(days<=7?'red':'green')+'">'+days+'天后</span>':'<span class="tag red">今日</span>')+'</div></div>'}).join(''):'<div class="empty">暂无节点</div>'}
+        <div class="divider"></div><h3 style="margin-top:6px">全部节点</h3><div class="scroll-y" style="max-height:220px">${DB.calendar.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>'<div class="flex between" style="padding:5px 0;font-size:13px"><span>'+esc(e.event)+'</span><span class="text-muted text-xs">'+fmtDate(e.date)+' <a onclick="delEvent(\''+e.date+'\')" style="color:var(--danger);cursor:pointer;margin-left:5px">\u00d7</a></span></div>').join('')}</div>
+      </div>
+    </div>
+  `;
+}
+function addEvent(){
+  showModal('<h3>添加考情节点</h3><div class="form-row"><div><label>日期</label><input type="date" class="input" id="ev-date" value="'+today()+'"></div></div><div class="form-row"><div><label>事件名称</label><input class="input" id="ev-name" placeholder="如：报名截止"></div></div><div class="actions"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveEvent()">添加</button></div>');
+}
+function saveEvent(){const d=$('#ev-date').value,n=$('#ev-name').value.trim();if(!d||!n)return;DB.calendar.push({date:d,event:n,type:'custom'});save();closeModal();renderCalendar()}
+function delEvent(date){DB.calendar=DB.calendar.filter(e=>e.date!==date);save();renderCalendar()}
+
+/* ============ 渲染：笔记聚合 ============ */
+function renderNotes(){
+  const notes=[];
+  DB.mistakes.forEach(m=>{notes.push({type:'mistake',title:m.module+' · '+m.cause,body:m.question,meta:fmtDate(m.date)+' · '+esc(m.source),extra:'解析：'+m.analysis,module:m.module})});
+  DB.jingdu.topics.forEach(t=>{t.articles.forEach(a=>{notes.push({type:'qiushi',title:'精读：'+a.title,body:a.sentences||a.structure||'',meta:fmtDate(a.date)+' · '+t.name,extra:a.words||'',module:t.name})})});
+  Object.entries(DB.chaoge).forEach(([lk,l])=>{l.modules.forEach(m=>{m.lessons.forEach(lesson=>{if(lesson.done&&lesson.notes){notes.push({type:'course',title:'课程：'+m.name+' - '+lesson.name,body:lesson.notes,meta:'超格精讲桶 · '+lk,module:m.name})}})})});
+  notes.sort((a,b)=>b.meta.localeCompare(a.meta));
+  const mistakeCount=notes.filter(n=>n.type==='mistake').length;
+  const qiushiCount=notes.filter(n=>n.type==='qiushi').length;
+  const courseCount=notes.filter(n=>n.type==='course').length;
+  $('#page-notes').innerHTML=`
+    <div class="page-header"><div><h2>笔记聚合</h2><div class="sub">错题笔记 · 精读笔记 · 课程笔记 统一汇总</div></div></div>
+    <div class="grid grid-4">
+      <div class="stat-card"><span class="stat-num text-danger">${mistakeCount}</span><span class="stat-label">错题笔记</span></div>
+      <div class="stat-card"><span class="stat-num text-info">${qiushiCount}</span><span class="stat-label">精读笔记</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:var(--warn)">${courseCount}</span><span class="stat-label">课程笔记</span></div>
+      <div class="stat-card"><span class="stat-num text-primary">${notes.length}</span><span class="stat-label">笔记总数</span></div>
+    </div>
+    <div class="card mt-16">
+      <div class="flex mb-12" style="gap:8px">
+        <input class="input" id="note-search" placeholder="搜索笔记内容..." oninput="filterNotes(this.value)" style="max-width:280px">
+        <select class="input" id="note-type-filter" onchange="filterNotes($(\'#note-search\').value)" style="max-width:140px"><option value="">全部类型</option><option value="mistake">错题笔记</option><option value="qiushi">精读笔记</option><option value="course">课程笔记</option></select>
+        <select class="input" id="note-mod-filter" onchange="filterNotes($(\'#note-search\').value)" style="max-width:140px"><option value="">全部模块</option>${[...new Set(notes.map(n=>n.module))].map(m=>'<option>'+m+'</option>').join('')}</select>
+      </div>
+      <div id="note-list">${renderNoteList(notes)}</div>
+    </div>
+  `;
+}
+function renderNoteList(notes){
+  if(!notes.length)return '<div class="empty"><span class="ico">\ud83d\udcdd</span>暂无笔记。在错题集、精读库或超格课程中记录笔记后会自动聚合到这里。</div>';
+  return notes.map(n=>'<div class="note-card note-'+n.type+'"><span class="note-type note-'+n.type+'">'+(n.type==='mistake'?'错题':n.type==='qiushi'?'精读':'课程')+'</span><div class="note-title">'+esc(n.title)+'</div><div class="note-body">'+esc(n.body)+'</div>'+(n.extra?'<div class="text-sm mt-6" style="color:var(--text-light);background:var(--bg);padding:5px 8px;border-radius:4px">'+esc(n.extra)+'</div>':'')+'<div class="note-meta">'+n.meta+'</div></div>').join('');
+}
+function filterNotes(q){
+  q=q.toLowerCase();const typeFilter=$('#note-type-filter')?$('#note-type-filter').value:'';const modFilter=$('#note-mod-filter')?$('#note-mod-filter').value:'';
+  const notes=[];DB.mistakes.forEach(m=>{notes.push({type:'mistake',title:m.module+' · '+m.cause,body:m.question,meta:fmtDate(m.date)+' · '+esc(m.source),extra:'解析：'+m.analysis,module:m.module})});
+  DB.jingdu.topics.forEach(t=>{t.articles.forEach(a=>{notes.push({type:'qiushi',title:'精读：'+a.title,body:a.sentences||a.structure||'',meta:fmtDate(a.date)+' · '+t.name,extra:a.words||'',module:t.name})})});
+  Object.entries(DB.chaoge).forEach(([lk,l])=>{l.modules.forEach(m=>{m.lessons.forEach(lesson=>{if(lesson.done&&lesson.notes){notes.push({type:'course',title:'课程：'+m.name+' - '+lesson.name,body:lesson.notes,meta:'超格精讲桶 · '+lk,module:m.name})}})})});
+  const filtered=notes.filter(n=>(!q||n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)||(n.extra||'').toLowerCase().includes(q))&&(!typeFilter||n.type===typeFilter)&&(!modFilter||n.module===modFilter));
+  $('#note-list').innerHTML=renderNoteList(filtered);
+}
+
+/* ============ 模态框 ============ */
+function showModal(html){$('#modal-root').innerHTML='<div class="modal">'+html+'</div>';$('#modal-root').classList.add('show')}
+function closeModal(){$('#modal-root').classList.remove('show');$('#modal-root').innerHTML=''}
+
+/* ============ 导航 ============ */
+function nav(page){
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
+  $$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page));
+  const fn={dashboard:renderDashboard,plan:renderPlan,chaoge:renderChaoge,practice:renderPractice,mistakes:renderMistakes,idioms:renderIdioms,qiushi:renderQiushi,mindmap:renderMindmap,calendar:renderCalendar,notes:renderNotes};
+  if(fn[page])fn[page]();
+}
+function resetData(){if(confirm('确定重置所有数据为示例数据？')){localStorage.removeItem('gkwb_data_v2');DB=defaultData();save();nav('dashboard')}}
+
+/* ============ 数据导出/导入 ============ */
+function exportData(){
+  const data=JSON.stringify(DB,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='gkwb-backup-'+today()+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  // 移动端提示
+  const isMobile=/iPhone|iPad|Android/i.test(navigator.userAgent);
+  if(isMobile){
+    alert('✅ 导出成功！\n\n请将下载的文件保存到iCloud/文件App中。\n\n在另一台设备上，点击「📥 导入数据」选择该文件即可同步。');
+  }
+}
+
+function importData(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(!confirm('⚠️ 导入将覆盖当前所有数据（错题、精读、课程进度等）。\n\n确定要导入吗？')){input.value='';return}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.profile||!data.chaoge){throw new Error('数据格式不正确')}
+      DB=data;
+      save();
+      alert('✅ 导入成功！数据已更新。');
+      nav('dashboard');
+    }catch(err){
+      alert('❌ 导入失败：文件格式不正确。\n\n请确保导入的是「导出数据」生成的文件。');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ============ 初始化 ============ */
+$$('.nav-item').forEach(n=>n.addEventListener('click',()=>nav(n.dataset.page)));
+getDaily(today());
+renderDashboard();
+</script>
+</body>
+</html>
